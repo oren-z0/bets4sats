@@ -5,7 +5,7 @@
     <q-card>
       <q-card-section>
         <q-btn unelevated color="primary" @click="formDialog.show = true"
-          >New Event</q-btn
+          >New Competition</q-btn
         >
       </q-card-section>
     </q-card>
@@ -14,10 +14,10 @@
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">
           <div class="col">
-            <h5 class="text-subtitle1 q-my-none">Events</h5>
+            <h5 class="text-subtitle1 q-my-none">Competitions</h5>
           </div>
           <div class="col-auto">
-            <q-btn flat color="grey" @click="exporteventsCSV"
+            <q-btn flat color="grey" @click="exportcompetitionsCSV"
               >Export to CSV</q-btn
             >
           </div>
@@ -25,10 +25,10 @@
         <q-table
           dense
           flat
-          :data="events"
+          :data="competitions"
           row-key="id"
-          :columns="eventsTable.columns"
-          :pagination.sync="eventsTable.pagination"
+          :columns="competitionsTable.columns"
+          :pagination.sync="competitionsTable.pagination"
         >
           {% raw %}
           <template v-slot:header="props">
@@ -62,7 +62,7 @@
                   icon="how_to_reg"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/events/register/' + props.row.id"
+                  :href="'/competitions/register/' + props.row.id"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -84,7 +84,7 @@
                   flat
                   dense
                   size="xs"
-                  @click="deleteEvent(props.row.id)"
+                  @click="deleteCompetition(props.row.id)"
                   icon="cancel"
                   color="pink"
                 ></q-btn>
@@ -135,7 +135,7 @@
                   icon="local_activity"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/events/ticket/' + props.row.id"
+                  :href="'/competitions/ticket/' + props.row.id"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -165,19 +165,19 @@
     <q-card>
       <q-card-section>
         <h6 class="text-subtitle1 q-my-none">
-          {{SITE_TITLE}} Events extension
+          {{SITE_TITLE}} Bookie extension
         </h6>
       </q-card-section>
       <q-card-section class="q-pa-none">
         <q-separator></q-separator>
-        <q-list> {% include "events/_api_docs.html" %} </q-list>
+        <q-list> {% include "bookie/_api_docs.html" %} </q-list>
       </q-card-section>
     </q-card>
   </div>
 
   <q-dialog v-model="formDialog.show" position="top">
     <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
-      <q-form @submit="sendEventData" class="q-gutter-md">
+      <q-form @submit="sendCompetitionData" class="q-gutter-md">
         <div class="row">
           <div class="col">
             <q-input
@@ -185,7 +185,7 @@
               dense
               v-model.trim="formDialog.data.name"
               type="name"
-              label="Title of event "
+              label="Title of competition "
             ></q-input>
           </div>
           <div class="col q-pl-sm">
@@ -206,7 +206,7 @@
           dense
           v-model.trim="formDialog.data.info"
           type="textarea"
-          label="Info about the event "
+          label="Info about the competition "
         ></q-input>
         <div class="row">
           <div class="col-4">Ticket closing date</div>
@@ -221,24 +221,24 @@
         </div>
 
         <div class="row">
-          <div class="col-4">Event begins</div>
+          <div class="col-4">Competition begins</div>
           <div class="col-8">
             <q-input
               filled
               dense
-              v-model.trim="formDialog.data.event_start_date"
+              v-model.trim="formDialog.data.competition_start_date"
               type="date"
             ></q-input>
           </div>
         </div>
 
         <div class="row">
-          <div class="col-4">Event ends</div>
+          <div class="col-4">Competition ends</div>
           <div class="col-8">
             <q-input
               filled
               dense
-              v-model.trim="formDialog.data.event_end_date"
+              v-model.trim="formDialog.data.competition_end_date"
               type="date"
             ></q-input>
           </div>
@@ -271,15 +271,15 @@
             unelevated
             color="primary"
             type="submit"
-            >Update Event</q-btn
+            >Update Competition</q-btn
           >
           <q-btn
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.event_start_date == null || formDialog.data.event_end_date == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
+            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.competition_start_date == null || formDialog.data.competition_end_date == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
             type="submit"
-            >Create Event</q-btn
+            >Create Competition</q-btn
           >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto"
             >Cancel</q-btn
@@ -291,13 +291,13 @@
 </div>
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
 <script>
-  var mapEvents = function (obj) {
+  var mapCompetitions = function (obj) {
     obj.date = Quasar.utils.date.formatDate(
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
     obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
-    obj.displayUrl = ['/events/', obj.id].join('')
+    obj.displayUrl = ['/competitions/', obj.id].join('')
     return obj
   }
 
@@ -306,24 +306,24 @@
     mixins: [windowMixin],
     data: function () {
       return {
-        events: [],
+        competitions: [],
         tickets: [],
-        eventsTable: {
+        competitionsTable: {
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
             {name: 'name', align: 'left', label: 'Name', field: 'name'},
             {name: 'info', align: 'left', label: 'Info', field: 'info'},
             {
-              name: 'event_start_date',
+              name: 'competition_start_date',
               align: 'left',
               label: 'Start date',
-              field: 'event_start_date'
+              field: 'competition_start_date'
             },
             {
-              name: 'event_end_date',
+              name: 'competition_end_date',
               align: 'left',
               label: 'End date',
-              field: 'event_end_date'
+              field: 'competition_end_date'
             },
             {
               name: 'closing_date',
@@ -357,7 +357,7 @@
         ticketsTable: {
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
-            {name: 'event', align: 'left', label: 'Event', field: 'event'},
+            {name: 'competition', align: 'left', label: 'Competition', field: 'competition'},
             {name: 'name', align: 'left', label: 'Name', field: 'name'},
             {name: 'email', align: 'left', label: 'Email', field: 'email'},
             {
@@ -383,14 +383,14 @@
         LNbits.api
           .request(
             'GET',
-            '/events/api/v1/tickets?all_wallets=true',
+            '/bookie/api/v1/tickets?all_wallets=true',
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
             console.log(response)
             self.tickets = response.data.map(function (obj) {
               console.log(obj)
-              return mapEvents(obj)
+              return mapCompetitions(obj)
             })
           })
       },
@@ -404,7 +404,7 @@
             LNbits.api
               .request(
                 'DELETE',
-                '/events/api/v1/tickets/' + ticketId,
+                '/bookie/api/v1/tickets/' + ticketId,
                 _.findWhere(self.g.user.wallets, {id: tickets.wallet}).inkey
               )
               .then(function (response) {
@@ -421,40 +421,40 @@
         LNbits.utils.exportCSV(this.ticketsTable.columns, this.tickets)
       },
 
-      getEvents: function () {
+      getCompetitions: function () {
         var self = this
 
         LNbits.api
           .request(
             'GET',
-            '/events/api/v1/events?all_wallets=true',
+            '/bookie/api/v1/competitions?all_wallets=true',
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
-            self.events = response.data.map(function (obj) {
-              return mapEvents(obj)
+            self.competitions = response.data.map(function (obj) {
+              return mapCompetitions(obj)
             })
           })
       },
-      sendEventData: function () {
+      sendCompetitionData: function () {
         var wallet = _.findWhere(this.g.user.wallets, {
           id: this.formDialog.data.wallet
         })
         var data = this.formDialog.data
 
         if (data.id) {
-          this.updateEvent(wallet, data)
+          this.updateCompetition(wallet, data)
         } else {
-          this.createEvent(wallet, data)
+          this.createCompetition(wallet, data)
         }
       },
 
-      createEvent: function (wallet, data) {
+      createCompetition: function (wallet, data) {
         var self = this
         LNbits.api
-          .request('POST', '/events/api/v1/events', wallet.inkey, data)
+          .request('POST', '/bookie/api/v1/competitions', wallet.inkey, data)
           .then(function (response) {
-            self.events.push(mapEvents(response.data))
+            self.competitions.push(mapCompetitions(response.data))
             self.formDialog.show = false
             self.formDialog.data = {}
           })
@@ -463,35 +463,35 @@
           })
       },
       updateformDialog: function (formId) {
-        var link = _.findWhere(this.events, {id: formId})
+        var link = _.findWhere(this.competitions, {id: formId})
         console.log(link.id)
         this.formDialog.data.id = link.id
         this.formDialog.data.wallet = link.wallet
         this.formDialog.data.name = link.name
         this.formDialog.data.info = link.info
         this.formDialog.data.closing_date = link.closing_date
-        this.formDialog.data.event_start_date = link.event_start_date
-        this.formDialog.data.event_end_date = link.event_end_date
+        this.formDialog.data.competition_start_date = link.competition_start_date
+        this.formDialog.data.competition_end_date = link.competition_end_date
         this.formDialog.data.amount_tickets = link.amount_tickets
         this.formDialog.data.price_per_ticket = link.price_per_ticket
         this.formDialog.show = true
       },
-      updateEvent: function (wallet, data) {
+      updateCompetition: function (wallet, data) {
         var self = this
         console.log(data)
 
         LNbits.api
           .request(
             'PUT',
-            '/events/api/v1/events/' + data.id,
+            '/bookie/api/v1/competitions/' + data.id,
             wallet.inkey,
             data
           )
           .then(function (response) {
-            self.events = _.reject(self.events, function (obj) {
+            self.competitions = _.reject(self.competitions, function (obj) {
               return obj.id == data.id
             })
-            self.events.push(mapEvents(response.data))
+            self.competitions.push(mapCompetitions(response.data))
             self.formDialog.show = false
             self.formDialog.data = {}
           })
@@ -499,9 +499,9 @@
             LNbits.utils.notifyApiError(error)
           })
       },
-      deleteEvent: function (eventsId) {
+      deleteCompetition: function (competitionsId) {
         var self = this
-        var events = _.findWhere(this.events, {id: eventsId})
+        var competitions = _.findWhere(this.competitions, {id: competitionsId})
 
         LNbits.utils
           .confirmDialog('Are you sure you want to delete this form link?')
@@ -509,12 +509,12 @@
             LNbits.api
               .request(
                 'DELETE',
-                '/events/api/v1/events/' + eventsId,
-                _.findWhere(self.g.user.wallets, {id: events.wallet}).inkey
+                '/bookie/api/v1/competitions/' + competitionsId,
+                _.findWhere(self.g.user.wallets, {id: competitions.wallet}).inkey
               )
               .then(function (response) {
-                self.events = _.reject(self.events, function (obj) {
-                  return obj.id == eventsId
+                self.competitions = _.reject(self.competitions, function (obj) {
+                  return obj.id == competitionsId
                 })
               })
               .catch(function (error) {
@@ -522,15 +522,15 @@
               })
           })
       },
-      exporteventsCSV: function () {
-        LNbits.utils.exportCSV(this.eventsTable.columns, this.events)
+      exportcompetitionsCSV: function () {
+        LNbits.utils.exportCSV(this.competitionsTable.columns, this.competitions)
       }
     },
 
     created: function () {
       if (this.g.user.wallets.length) {
         this.getTickets()
-        this.getEvents()
+        this.getCompetitions()
       }
     }
   })

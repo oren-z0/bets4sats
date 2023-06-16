@@ -2,13 +2,13 @@ from fastapi.param_functions import Query
 from pydantic import BaseModel
 
 
-class CreateEvent(BaseModel):
+class CreateCompetition(BaseModel):
     wallet: str
     name: str
     info: str
     closing_date: str
-    event_start_date: str
-    event_end_date: str
+    competition_start_date: str
+    competition_end_date: str
     amount_tickets: int = Query(..., ge=0)
     price_per_ticket: int = Query(..., ge=0)
 
@@ -18,14 +18,14 @@ class CreateTicket(BaseModel):
     email: str
 
 
-class Events(BaseModel):
+class Competitions(BaseModel):
     id: str
     wallet: str
     name: str
     info: str
     closing_date: str
-    event_start_date: str
-    event_end_date: str
+    competition_start_date: str
+    competition_end_date: str
     amount_tickets: int
     price_per_ticket: int
     sold: int
@@ -35,7 +35,7 @@ class Events(BaseModel):
 class Tickets(BaseModel):
     id: str
     wallet: str
-    event: str
+    competition: str
     name: str
     email: str
     registered: bool

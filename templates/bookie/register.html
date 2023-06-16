@@ -5,7 +5,7 @@
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
         <center>
-          <h3 class="q-my-none">{{ event_name }} Registration</h3>
+          <h3 class="q-my-none">{{ competition_name }} Registration</h3>
           <br />
 
           <br />
@@ -46,7 +46,7 @@
                   icon="local_activity"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/events/ticket/' + props.row.id"
+                  :href="'/competitions/ticket/' + props.row.id"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -82,13 +82,13 @@
 <script>
   Vue.component(VueQrcode.name, VueQrcode)
   Vue.use(VueQrcodeReader)
-  var mapEvents = function (obj) {
+  var mapCompetitions = function (obj) {
     obj.date = Quasar.utils.date.formatDate(
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
     obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
-    obj.displayUrl = ['/events/', obj.id].join('')
+    obj.displayUrl = ['/competitions/', obj.id].join('')
     return obj
   }
   new Vue({
@@ -135,7 +135,7 @@
         LNbits.api
           .request(
             'GET',
-            '/events/api/v1/register/ticket/' + res.split('//')[1]
+            '/bookie/api/v1/register/ticket/' + res.split('//')[1]
           )
           .then(function (response) {
             self.$q.notify({
@@ -150,17 +150,17 @@
             LNbits.utils.notifyApiError(error)
           })
       },
-      getEventTickets: function () {
+      getCompetitionTickets: function () {
         var self = this
         console.log('obj')
         LNbits.api
           .request(
             'GET',
-            '/events/api/v1/eventtickets/{{ wallet_id }}/{{ event_id }}'
+            '/bookie/api/v1/competitiontickets/{{ wallet_id }}/{{ competition_id }}'
           )
           .then(function (response) {
             self.tickets = response.data.map(function (obj) {
-              return mapEvents(obj)
+              return mapCompetitions(obj)
             })
           })
           .catch(function (error) {
@@ -169,7 +169,7 @@
       }
     },
     created: function () {
-      this.getEventTickets()
+      this.getCompetitionTickets()
     }
   })
 </script>

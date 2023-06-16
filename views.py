@@ -9,60 +9,60 @@ from starlette.responses import HTMLResponse
 from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 
-from . import events_ext, events_renderer
-from .crud import get_event, get_ticket
+from . import bookie_ext, bookie_renderer
+from .crud import get_competition, get_ticket
 
 templates = Jinja2Templates(directory="templates")
 
 
-@events_ext.get("/", response_class=HTMLResponse)
+@bookie_ext.get("/", response_class=HTMLResponse)
 async def index(request: Request, user: User = Depends(check_user_exists)):
-    return events_renderer().TemplateResponse(
-        "events/index.html", {"request": request, "user": user.dict()}
+    return bookie_renderer().TemplateResponse(
+        "bookie/index.html", {"request": request, "user": user.dict()}
     )
 
 
-@events_ext.get("/{event_id}", response_class=HTMLResponse)
-async def display(request: Request, event_id):
-    event = await get_event(event_id)
-    if not event:
+@bookie_ext.get("/{competition_id}", response_class=HTMLResponse)
+async def display(request: Request, competition_id):
+    competition = await get_competition(competition_id)
+    if not competition:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Event does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
 
-    if event.amount_tickets < 1:
-        return events_renderer().TemplateResponse(
-            "events/error.html",
+    if competition.amount_tickets < 1:
+        return bookie_renderer().TemplateResponse(
+            "bookie/error.html",
             {
                 "request": request,
-                "event_name": event.name,
-                "event_error": "Sorry, tickets are sold out :(",
+                "competition_name": competition.name,
+                "competition_error": "Sorry, tickets are sold out :(",
             },
         )
-    datetime_object = datetime.strptime(event.closing_date, "%Y-%m-%d").date()
+    datetime_object = datetime.strptime(competition.closing_date, "%Y-%m-%d").date()
     if date.today() > datetime_object:
-        return events_renderer().TemplateResponse(
-            "events/error.html",
+        return bookie_renderer().TemplateResponse(
+            "bookie/error.html",
             {
                 "request": request,
-                "event_name": event.name,
-                "event_error": "Sorry, ticket closing date has passed :(",
+                "competition_name": competition.name,
+                "competition_error": "Sorry, ticket closing date has passed :(",
             },
         )
 
-    return events_renderer().TemplateResponse(
-        "events/display.html",
+    return bookie_renderer().TemplateResponse(
+        "bookie/display.html",
         {
             "request": request,
-            "event_id": event_id,
-            "event_name": event.name,
-            "event_info": event.info,
-            "event_price": event.price_per_ticket,
+            "competition_id": competition_id,
+            "competition_name": competition.name,
+            "competition_info": competition.info,
+            "competition_price": competition.price_per_ticket,
         },
     )
 
 
-@events_ext.get("/ticket/{ticket_id}", response_class=HTMLResponse)
+@bookie_ext.get("/ticket/{ticket_id}", response_class=HTMLResponse)
 async def ticket(request: Request, ticket_id):
     ticket = await get_ticket(ticket_id)
     if not ticket:
@@ -70,37 +70,37 @@ async def ticket(request: Request, ticket_id):
             status_code=HTTPStatus.NOT_FOUND, detail="Ticket does not exist."
         )
 
-    event = await get_event(ticket.event)
-    if not event:
+    competition = await get_competition(ticket.competition)
+    if not competition:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Event does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
 
-    return events_renderer().TemplateResponse(
-        "events/ticket.html",
+    return bookie_renderer().TemplateResponse(
+        "bookie/ticket.html",
         {
             "request": request,
             "ticket_id": ticket_id,
-            "ticket_name": event.name,
-            "ticket_info": event.info,
+            "ticket_name": competition.name,
+            "ticket_info": competition.info,
         },
     )
 
 
-@events_ext.get("/register/{event_id}", response_class=HTMLResponse)
-async def register(request: Request, event_id):
-    event = await get_event(event_id)
-    if not event:
+@bookie_ext.get("/register/{competition_id}", response_class=HTMLResponse)
+async def register(request: Request, competition_id):
+    competition = await get_competition(competition_id)
+    if not competition:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Event does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
 
-    return events_renderer().TemplateResponse(
-        "events/register.html",
+    return bookie_renderer().TemplateResponse(
+        "bookie/register.html",
         {
             "request": request,
-            "event_id": event_id,
-            "event_name": event.name,
-            "wallet_id": event.wallet,
+            "competition_id": competition_id,
+            "competition_name": competition.name,
+            "wallet_id": competition.wallet,
         },
     )

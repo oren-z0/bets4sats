@@ -3,9 +3,9 @@
   <div class="col-12 col-md-7 col-lg-6 q-gutter-y-md">
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
-        <h3 class="q-my-none">{{ event_name }}</h3>
+        <h3 class="q-my-none">{{ competition_name }}</h3>
         <br />
-        <h5 class="q-my-none">{{ event_info }}</h5>
+        <h5 class="q-my-none">{{ competition_info }}</h5>
         <br />
         <q-form @submit="Invoice()" class="q-gutter-md">
           <q-input
@@ -119,7 +119,7 @@
 
     methods: {
       resetForm: function (e) {
-        e.preventDefault()
+        e.prcompetitionDefault()
         this.formDialog.data.name = ''
         this.formDialog.data.email = ''
       },
@@ -136,8 +136,8 @@
         axios
 
           .get(
-            '/events/api/v1/tickets/' +
-              '{{ event_id }}' +
+            '/bookie/api/v1/tickets/' +
+              '{{ competition_id }}' +
               '/' +
               self.formDialog.data.name +
               '/' +
@@ -161,12 +161,12 @@
             paymentChecker = setInterval(function () {
               axios
                 .post(
-                  '/events/api/v1/tickets/' +
-                    '{{ event_id }}/' +
+                  '/bookie/api/v1/tickets/' +
+                    '{{ competition_id }}/' +
                     self.paymentCheck,
                   {
-                    event: '{{ event_id }}',
-                    event_name: '{{ event_name }}',
+                    competition: '{{ competition_id }}',
+                    competition_name: '{{ competition_name }}',
                     name: self.formDialog.data.name,
                     email: self.formDialog.data.email
                   }
@@ -192,12 +192,12 @@
                     self.ticketLink = {
                       show: true,
                       data: {
-                        link: '/events/ticket/' + res.data.ticket_id
+                        link: '/competitions/ticket/' + res.data.ticket_id
                       }
                     }
                     setTimeout(function () {
                       window.location.href =
-                        '/events/ticket/' + res.data.ticket_id
+                        '/competitions/ticket/' + res.data.ticket_id
                     }, 5000)
                   }
                 })

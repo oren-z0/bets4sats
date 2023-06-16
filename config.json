@@ -1,6 +1,6 @@
 {
-	"name": "Events",
-	"short_description": "Sell and register event tickets",
-	"tile": "/events/static/image/events.png",
-	"contributors": ["benarc"]
+	"name": "Bookie",
+	"short_description": "Bet with friends on competitions",
+	"tile": "/bookie/static/image/bookie.png",
+	"contributors": ["benarc", "oren-z0"]
 }
