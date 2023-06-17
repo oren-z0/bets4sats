@@ -8,7 +8,6 @@ async def m001_initial(db):
             name TEXT NOT NULL,
             info TEXT NOT NULL,
             closing_date TEXT NOT NULL,
-            competition_end_date TEXT NOT NULL,
             amount_tickets INTEGER NOT NULL,
             price_per_ticket INTEGER NOT NULL,
             sold INTEGER NOT NULL,

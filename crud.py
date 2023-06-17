@@ -69,7 +69,7 @@ async def create_competition(data: CreateCompetition) -> Competitions:
     competition_id = urlsafe_short_hash()
     await db.execute(
         """
-        INSERT INTO bookie.competitions (id, wallet, name, info, closing_date, competition_end_date, amount_tickets, price_per_ticket, sold)
+        INSERT INTO bookie.competitions (id, wallet, name, info, closing_date, amount_tickets, price_per_ticket, sold)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
@@ -78,7 +78,6 @@ async def create_competition(data: CreateCompetition) -> Competitions:
             data.name,
             data.info,
             data.closing_date,
-            data.competition_end_date,
             data.amount_tickets,
             data.price_per_ticket,
             0,

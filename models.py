@@ -7,7 +7,6 @@ class CreateCompetition(BaseModel):
     name: str
     info: str
     closing_date: str
-    competition_end_date: str
     amount_tickets: int = Query(..., ge=0)
     price_per_ticket: int = Query(..., ge=0)
 
@@ -23,7 +22,6 @@ class Competitions(BaseModel):
     name: str
     info: str
     closing_date: str
-    competition_end_date: str
     amount_tickets: int
     price_per_ticket: int
     sold: int
