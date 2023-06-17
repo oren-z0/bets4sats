@@ -221,18 +221,6 @@
         </div>
 
         <div class="row">
-          <div class="col-4">Competition begins</div>
-          <div class="col-8">
-            <q-input
-              filled
-              dense
-              v-model.trim="formDialog.data.competition_start_date"
-              type="date"
-            ></q-input>
-          </div>
-        </div>
-
-        <div class="row">
           <div class="col-4">Competition ends</div>
           <div class="col-8">
             <q-input
@@ -277,7 +265,7 @@
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.competition_start_date == null || formDialog.data.competition_end_date == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
+            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.competition_end_date == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
             type="submit"
             >Create Competition</q-btn
           >
@@ -313,12 +301,6 @@
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
             {name: 'name', align: 'left', label: 'Name', field: 'name'},
             {name: 'info', align: 'left', label: 'Info', field: 'info'},
-            {
-              name: 'competition_start_date',
-              align: 'left',
-              label: 'Start date',
-              field: 'competition_start_date'
-            },
             {
               name: 'competition_end_date',
               align: 'left',
@@ -470,7 +452,6 @@
         this.formDialog.data.name = link.name
         this.formDialog.data.info = link.info
         this.formDialog.data.closing_date = link.closing_date
-        this.formDialog.data.competition_start_date = link.competition_start_date
         this.formDialog.data.competition_end_date = link.competition_end_date
         this.formDialog.data.amount_tickets = link.amount_tickets
         this.formDialog.data.price_per_ticket = link.price_per_ticket
