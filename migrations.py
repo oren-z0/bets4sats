@@ -25,7 +25,7 @@ async def m001_initial(db):
             wallet TEXT NOT NULL,
             competition TEXT NOT NULL,
             name TEXT NOT NULL,
-            email TEXT NOT NULL,
+            reward_target TEXT NOT NULL,
             registered BOOLEAN NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
@@ -44,7 +44,7 @@ async def m002_changed(db):
             wallet TEXT NOT NULL,
             competition TEXT NOT NULL,
             name TEXT NOT NULL,
-            email TEXT NOT NULL,
+            reward_target TEXT NOT NULL,
             registered BOOLEAN NOT NULL,
             paid BOOLEAN NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
@@ -70,7 +70,7 @@ async def m002_changed(db):
                 wallet,
                 competition,
                 name,
-                email,
+                reward_target,
                 registered,
                 paid
             )

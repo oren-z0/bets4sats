@@ -96,8 +96,8 @@ async def api_tickets(
     return [ticket.dict() for ticket in await get_tickets(wallet_ids)]
 
 
-@bookie_ext.get("/api/v1/tickets/{competition_id}/{name}/{email}")
-async def api_ticket_make_ticket(competition_id, name, email):
+@bookie_ext.get("/api/v1/tickets/{competition_id}/{name}/{reward_target}")
+async def api_ticket_make_ticket(competition_id, name, reward_target):
     competition = await get_competition(competition_id)
     if not competition:
         raise HTTPException(
@@ -108,7 +108,7 @@ async def api_ticket_make_ticket(competition_id, name, email):
             wallet_id=competition.wallet,
             amount=competition.price_per_ticket,
             memo=f"{competition_id}",
-            extra={"tag": "competitions", "name": name, "email": email},
+            extra={"tag": "competitions", "name": name, "reward_target": reward_target},
         )
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
@@ -136,7 +136,7 @@ async def api_ticket_send_ticket(competition_id, payment_hash, data: CreateTicke
             wallet=competition.wallet,
             competition=competition_id,
             name=data.name,
-            email=data.email,
+            reward_target=data.reward_target,
         )
         if not ticket:
             raise HTTPException(

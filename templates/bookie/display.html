@@ -18,16 +18,16 @@
           <q-input
             filled
             dense
-            v-model.trim="formDialog.data.email"
-            type="email"
-            label="Your email "
+            v-model.trim="formDialog.data.reward_target"
+            type="text"
+            label="Your lightning-address "
           ></q-input>
 
           <div class="row q-mt-lg">
             <q-btn
               unelevated
               color="primary"
-              :disable="formDialog.data.name == '' || formDialog.data.email == '' || paymentReq"
+              :disable="formDialog.data.name == '' || formDialog.data.reward_target == '' || paymentReq"
               type="submit"
               >Submit</q-btn
             >
@@ -100,7 +100,7 @@
           show: false,
           data: {
             name: '',
-            email: ''
+            reward_target: ''
           }
         },
         ticketLink: {
@@ -121,7 +121,7 @@
       resetForm: function (e) {
         e.prcompetitionDefault()
         this.formDialog.data.name = ''
-        this.formDialog.data.email = ''
+        this.formDialog.data.reward_target = ''
       },
 
       closeReceiveDialog: function () {
@@ -141,7 +141,7 @@
               '/' +
               self.formDialog.data.name +
               '/' +
-              self.formDialog.data.email
+              self.formDialog.data.reward_target
           )
           .then(function (response) {
             self.paymentReq = response.data.payment_request
@@ -168,7 +168,7 @@
                     competition: '{{ competition_id }}',
                     competition_name: '{{ competition_name }}',
                     name: self.formDialog.data.name,
-                    email: self.formDialog.data.email
+                    reward_target: self.formDialog.data.reward_target
                   }
                 )
                 .then(function (res) {
@@ -176,7 +176,7 @@
                     clearInterval(paymentChecker)
                     dismissMsg()
                     self.formDialog.data.name = ''
-                    self.formDialog.data.email = ''
+                    self.formDialog.data.reward_target = ''
 
                     self.$q.notify({
                       type: 'positive',

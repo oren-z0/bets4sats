@@ -13,7 +13,7 @@ class CreateCompetition(BaseModel):
 
 class CreateTicket(BaseModel):
     name: str
-    email: str
+    reward_target: str
 
 
 class Competitions(BaseModel):
@@ -33,7 +33,7 @@ class Tickets(BaseModel):
     wallet: str
     competition: str
     name: str
-    email: str
+    reward_target: str
     registered: bool
     paid: bool
     time: int

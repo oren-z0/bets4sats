@@ -23,14 +23,14 @@ async def on_invoice_paid(payment: Payment) -> None:
         payment.extra
         and "competitions" == payment.extra.get("tag")
         and payment.extra.get("name")
-        and payment.extra.get("email")
+        and payment.extra.get("reward_target")
     ):
         await api_ticket_send_ticket(
             payment.memo,
             payment.payment_hash,
             CreateTicket(
                 name=str(payment.extra.get("name")),
-                email=str(payment.extra.get("email")),
+                reward_target=str(payment.extra.get("reward_target")),
             ),
         )
     return
