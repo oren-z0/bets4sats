@@ -123,7 +123,7 @@ async def delete_competition(competition_id: str) -> None:
 # COMPETITIONTICKETS
 
 
-async def get_competition_tickets(competition_id: str, wallet_id: str) -> List[Tickets]:
+async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) -> List[Tickets]:
     rows = await db.fetchall(
         "SELECT * FROM bookie.ticket WHERE wallet = ? AND competition = ?",
         (wallet_id, competition_id),

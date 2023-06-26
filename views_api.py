@@ -16,7 +16,7 @@ from .crud import (
     delete_competition_tickets,
     delete_ticket,
     get_competition,
-    get_competition_tickets,
+    get_wallet_competition_tickets,
     get_competitions,
     get_ticket,
     get_tickets,
@@ -169,7 +169,7 @@ async def api_ticket_delete(ticket_id, wallet: WalletTypeInfo = Depends(get_key_
 async def api_competition_tickets(wallet_id, competition_id):
     return [
         ticket.dict()
-        for ticket in await get_competition_tickets(wallet_id=wallet_id, competition_id=competition_id)
+        for ticket in await get_wallet_competition_tickets(wallet_id=wallet_id, competition_id=competition_id)
     ]
 
 
