@@ -29,7 +29,6 @@ async def m002_changed(db):
             competition TEXT NOT NULL,
             name TEXT NOT NULL,
             reward_target TEXT NOT NULL,
-            registered BOOLEAN NOT NULL,
             paid BOOLEAN NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now

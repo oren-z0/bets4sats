@@ -13,10 +13,10 @@ async def create_ticket(
 ) -> Tickets:
     await db.execute(
         """
-        INSERT INTO bookie.ticket (id, wallet, competition, name, reward_target, registered, paid)
+        INSERT INTO bookie.ticket (id, wallet, competition, name, reward_target, paid)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (payment_hash, wallet, competition, name, reward_target, False, True),
+        (payment_hash, wallet, competition, name, reward_target, True),
     )
 
     # UPDATE COMPETITION DATA ON SOLD TICKET
@@ -127,16 +127,5 @@ async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) ->
     rows = await db.fetchall(
         "SELECT * FROM bookie.ticket WHERE wallet = ? AND competition = ?",
         (wallet_id, competition_id),
-    )
-    return [Tickets(**row) for row in rows]
-
-
-async def reg_ticket(ticket_id: str) -> List[Tickets]:
-    await db.execute(
-        "UPDATE bookie.ticket SET registered = ? WHERE id = ?", (True, ticket_id)
-    )
-    ticket = await db.fetchone("SELECT * FROM bookie.ticket WHERE id = ?", (ticket_id,))
-    rows = await db.fetchall(
-        "SELECT * FROM bookie.ticket WHERE competition = ?", (ticket[1],)
     )
     return [Tickets(**row) for row in rows]

@@ -3,9 +3,9 @@
 
 ## Sell tickets for competitions and use the built-in scanner for registering attendants
 
-Bookie alows you to make tickets for a competition. Each ticket is in the form of a uniqque QR code. After registering, and paying for ticket, the user gets a QR code to present at registration/entrance.
+Bookie alows you to make tickets for a competition. Each ticket is in the form of a uniqque QR code. After registering, and paying for ticket, the user gets a QR code to present in case of a dispute.
 
-Bookie includes a shareable ticket scanner, which can be used to register attendees.
+Bookie includes a shareable ticket scanner, which can be used to check tickets status.
 
 ## Usage
 

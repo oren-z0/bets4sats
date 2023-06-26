@@ -20,7 +20,6 @@ from .crud import (
     get_competitions,
     get_ticket,
     get_tickets,
-    reg_ticket,
     update_competition,
 )
 from .models import CreateCompetition, CreateTicket
@@ -186,9 +185,4 @@ async def api_competition_register_ticket(ticket_id):
             status_code=HTTPStatus.FORBIDDEN, detail="Ticket not paid for."
         )
 
-    if ticket.registered is True:
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail="Ticket already registered"
-        )
-
-    return [ticket.dict() for ticket in await reg_ticket(ticket_id)]
+    return ticket.dict()

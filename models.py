@@ -34,6 +34,5 @@ class Tickets(BaseModel):
     competition: str
     name: str
     reward_target: str
-    registered: bool
     paid: bool
     time: int
