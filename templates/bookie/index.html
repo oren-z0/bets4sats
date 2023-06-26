@@ -209,13 +209,19 @@
           label="Info about the competition "
         ></q-input>
         <div class="row">
-          <div class="col-4">Ticket closing date</div>
+          <div class="col-4">Ticket closing date (UTC)</div>
           <div class="col-8">
             <q-input
               filled
               dense
               v-model.trim="formDialog.data.closing_date"
               type="date"
+            ></q-input>
+            <q-input
+              filled
+              dense
+              v-model.trim="formDialog.data.closing_time"
+              type="time"
             ></q-input>
           </div>
         </div>
@@ -253,7 +259,7 @@
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
+            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
             type="submit"
             >Create Competition</q-btn
           >
@@ -290,10 +296,10 @@
             {name: 'name', align: 'left', label: 'Name', field: 'name'},
             {name: 'info', align: 'left', label: 'Info', field: 'info'},
             {
-              name: 'closing_date',
+              name: 'closing_datetime',
               align: 'left',
               label: 'Ticket close',
-              field: 'closing_date'
+              field: 'closing_datetime'
             },
             {
               name: 'price_per_ticket',
@@ -404,7 +410,11 @@
         var wallet = _.findWhere(this.g.user.wallets, {
           id: this.formDialog.data.wallet
         })
-        var data = this.formDialog.data
+        const { closing_date, closing_time, ...other } = this.formDialog.data
+        const data = {
+          ...other,
+          closing_datetime: `${closing_date}T${closing_time}:00.000Z`,
+        }
 
         if (data.id) {
           this.updateCompetition(wallet, data)
@@ -433,7 +443,8 @@
         this.formDialog.data.wallet = link.wallet
         this.formDialog.data.name = link.name
         this.formDialog.data.info = link.info
-        this.formDialog.data.closing_date = link.closing_date
+        this.formDialog.data.closing_date = link.closing_datetime.split('T')[0]
+        this.formDialog.data.closing_time = link.closing_datetime.split('T')[1].slice(0, 5)
         this.formDialog.data.amount_tickets = link.amount_tickets
         this.formDialog.data.price_per_ticket = link.price_per_ticket
         this.formDialog.show = true

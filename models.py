@@ -6,7 +6,7 @@ class CreateCompetition(BaseModel):
     wallet: str
     name: str
     info: str
-    closing_date: str
+    closing_datetime: str
     amount_tickets: int = Query(..., ge=0)
     price_per_ticket: int = Query(..., ge=0)
 
@@ -21,7 +21,7 @@ class Competitions(BaseModel):
     wallet: str
     name: str
     info: str
-    closing_date: str
+    closing_datetime: str
     amount_tickets: int
     price_per_ticket: int
     sold: int

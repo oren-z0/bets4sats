@@ -7,7 +7,7 @@ async def m001_initial(db):
             wallet TEXT NOT NULL,
             name TEXT NOT NULL,
             info TEXT NOT NULL,
-            closing_date TEXT NOT NULL,
+            closing_datetime TEXT NOT NULL,
             amount_tickets INTEGER NOT NULL,
             price_per_ticket INTEGER NOT NULL,
             sold INTEGER NOT NULL,

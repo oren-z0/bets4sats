@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from http import HTTPStatus
 
 from fastapi import Depends, Request
@@ -39,8 +39,8 @@ async def display(request: Request, competition_id):
                 "competition_error": "Sorry, tickets are sold out :(",
             },
         )
-    datetime_object = datetime.strptime(competition.closing_date, "%Y-%m-%d").date()
-    if date.today() > datetime_object:
+    datetime_object = datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
+    if datetime.utcnow() > datetime_object:
         return bookie_renderer().TemplateResponse(
             "bookie/error.html",
             {
