@@ -62,7 +62,7 @@
                   icon="how_to_reg"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/competitions/register/' + props.row.id"
+                  :href="'/bookie/register/' + props.row.id"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -135,7 +135,7 @@
                   icon="local_activity"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/competitions/ticket/' + props.row.id"
+                  :href="'/bookie/ticket/' + props.row.id"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -279,7 +279,7 @@
       'YYYY-MM-DD HH:mm'
     )
     obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
-    obj.displayUrl = ['/competitions/', obj.id].join('')
+    obj.displayUrl = ['/bookie/', obj.id].join('')
     return obj
   }
 

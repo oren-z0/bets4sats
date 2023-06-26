@@ -192,12 +192,12 @@
                     self.ticketLink = {
                       show: true,
                       data: {
-                        link: '/competitions/ticket/' + res.data.ticket_id
+                        link: '/bookie/ticket/' + res.data.ticket_id
                       }
                     }
                     setTimeout(function () {
                       window.location.href =
-                        '/competitions/ticket/' + res.data.ticket_id
+                        '/bookie/ticket/' + res.data.ticket_id
                     }, 5000)
                   }
                 })
