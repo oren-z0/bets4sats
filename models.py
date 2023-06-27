@@ -1,6 +1,7 @@
 from fastapi.param_functions import Query
 from pydantic import BaseModel
 
+MAX_SATS=21_000_000_00_000_000
 
 class CreateCompetition(BaseModel):
     wallet: str
@@ -8,8 +9,8 @@ class CreateCompetition(BaseModel):
     info: str
     closing_datetime: str
     amount_tickets: int = Query(..., ge=0)
-    min_bet: int = Query(..., ge=0)
-    max_bet: int = Query(..., ge=0)
+    min_bet: int = Query(..., gt=0, lt=MAX_SATS)
+    max_bet: int = Query(..., gt=0, lt=MAX_SATS)
 
 
 class CreateTicket(BaseModel):
