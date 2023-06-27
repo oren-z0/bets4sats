@@ -236,13 +236,25 @@
               label="Amount of tickets "
             ></q-input>
           </div>
+        </div>
+
+        <div class="row">
           <div class="col q-pl-sm">
             <q-input
               filled
               dense
-              v-model.number="formDialog.data.price_per_ticket"
+              v-model.number="formDialog.data.min_bet"
               type="number"
-              label="Sats per ticket "
+              label="Min bet in sats "
+            ></q-input>
+          </div>
+          <div class="col q-pl-sm">
+            <q-input
+              filled
+              dense
+              v-model.number="formDialog.data.max_bet"
+              type="number"
+              label="Max bet in sats "
             ></q-input>
           </div>
         </div>
@@ -259,7 +271,7 @@
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.price_per_ticket == null"
+            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.min_bet == null || formDialog.data.max_bet == null || Number(formDialog.data.max_bet) < Number(formDialog.data.min_bet)"
             type="submit"
             >Create Competition</q-btn
           >
@@ -302,10 +314,16 @@
               field: 'closing_datetime'
             },
             {
-              name: 'price_per_ticket',
+              name: 'min_bet',
               align: 'left',
-              label: 'Price',
-              field: 'price_per_ticket'
+              label: 'Min bet',
+              field: 'min_bet'
+            },
+            {
+              name: 'max_bet',
+              align: 'left',
+              label: 'Max bet',
+              field: 'max_bet'
             },
             {
               name: 'amount_tickets',
@@ -440,7 +458,8 @@
         this.formDialog.data.closing_date = link.closing_datetime.split('T')[0]
         this.formDialog.data.closing_time = link.closing_datetime.split('T')[1].slice(0, 5)
         this.formDialog.data.amount_tickets = link.amount_tickets
-        this.formDialog.data.price_per_ticket = link.price_per_ticket
+        this.formDialog.data.min_bet = link.min_bet
+        this.formDialog.data.max_bet = link.max_bet
         this.formDialog.show = true
       },
       updateCompetition: function (wallet, data) {

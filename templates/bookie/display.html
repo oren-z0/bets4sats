@@ -11,9 +11,9 @@
           <q-input
             filled
             dense
-            v-model.trim="formDialog.data.name"
-            type="name"
-            label="Your name "
+            v-model.number="formDialog.data.amount"
+            type="number"
+            label="Amount in sats (between {{ competition_min_bet }} - {{ competition_max_bet }}) "
           ></q-input>
           <q-input
             filled
@@ -27,7 +27,7 @@
             <q-btn
               unelevated
               color="primary"
-              :disable="formDialog.data.name == '' || formDialog.data.reward_target == '' || paymentReq"
+              :disable="formDialog.data.reward_target == '' || !formDialog.data.amount || Number(formDialog.data.amount) < {{ competition_min_bet }} || Number(formDialog.data.amount) > {{ competition_max_bet }} || paymentReq"
               type="submit"
               >Submit</q-btn
             >
@@ -99,7 +99,7 @@
         formDialog: {
           show: false,
           data: {
-            name: '',
+            amount: 0,
             reward_target: ''
           }
         },
@@ -120,7 +120,7 @@
     methods: {
       resetForm: function (e) {
         e.prcompetitionDefault()
-        this.formDialog.data.name = ''
+        this.formDialog.data.amount = 0
         this.formDialog.data.reward_target = ''
       },
 
@@ -134,14 +134,12 @@
       Invoice: function () {
         var self = this
         axios
-
-          .get(
-            '/bookie/api/v1/tickets/' +
-              '{{ competition_id }}' +
-              '/' +
-              self.formDialog.data.name +
-              '/' +
-              self.formDialog.data.reward_target
+          .post(
+            '/bookie/api/v1/tickets/{{ competition_id }}',
+            {
+              reward_target: self.formDialog.data.reward_target,
+              amount: self.formDialog.data.amount,
+            }
           )
           .then(function (response) {
             self.paymentReq = response.data.payment_request
@@ -160,22 +158,16 @@
 
             paymentChecker = setInterval(function () {
               axios
-                .post(
+                .get(
                   '/bookie/api/v1/tickets/' +
                     '{{ competition_id }}/' +
-                    self.paymentCheck,
-                  {
-                    competition: '{{ competition_id }}',
-                    competition_name: '{{ competition_name }}',
-                    name: self.formDialog.data.name,
-                    reward_target: self.formDialog.data.reward_target
-                  }
+                    self.paymentCheck
                 )
                 .then(function (res) {
                   if (res.data.paid) {
                     clearInterval(paymentChecker)
                     dismissMsg()
-                    self.formDialog.data.name = ''
+                    self.formDialog.data.amount = 0
                     self.formDialog.data.reward_target = ''
 
                     self.$q.notify({

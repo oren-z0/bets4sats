@@ -21,7 +21,7 @@ async def on_invoice_paid(payment: Payment) -> None:
     # (avoid loops)
     if (
         payment.extra
-        and "competitions" == payment.extra.get("tag")
+        and "bookie" == payment.extra.get("tag")
         and payment.extra.get("name")
         and payment.extra.get("reward_target")
     ):

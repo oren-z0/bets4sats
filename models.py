@@ -8,13 +8,17 @@ class CreateCompetition(BaseModel):
     info: str
     closing_datetime: str
     amount_tickets: int = Query(..., ge=0)
-    price_per_ticket: int = Query(..., ge=0)
+    min_bet: int = Query(..., ge=0)
+    max_bet: int = Query(..., ge=0)
 
 
 class CreateTicket(BaseModel):
     name: str
     reward_target: str
 
+class CreateInvoiceForTicket(BaseModel):
+    reward_target: str
+    amount: int
 
 class Competitions(BaseModel):
     id: str
@@ -23,7 +27,8 @@ class Competitions(BaseModel):
     info: str
     closing_datetime: str
     amount_tickets: int
-    price_per_ticket: int
+    min_bet: int
+    max_bet: int
     sold: int
     time: int
 

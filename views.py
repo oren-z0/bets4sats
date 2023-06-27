@@ -57,7 +57,8 @@ async def display(request: Request, competition_id):
             "competition_id": competition_id,
             "competition_name": competition.name,
             "competition_info": competition.info,
-            "competition_price": competition.price_per_ticket,
+            "competition_min_bet": competition.min_bet,
+            "competition_max_bet": competition.max_bet,
         },
     )
 

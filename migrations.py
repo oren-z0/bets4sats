@@ -9,7 +9,8 @@ async def m001_initial(db):
             info TEXT NOT NULL,
             closing_datetime TEXT NOT NULL,
             amount_tickets INTEGER NOT NULL,
-            price_per_ticket INTEGER NOT NULL,
+            min_bet INTEGER NOT NULL,
+            max_bet INTEGER NOT NULL,
             sold INTEGER NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
