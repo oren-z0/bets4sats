@@ -22,9 +22,11 @@ async def on_invoice_paid(payment: Payment) -> None:
         payment.extra
         and "bookie" == payment.extra.get("tag")
         and payment.extra.get("reward_target")
+        and payment.memo and payment.memo.startswith("BookieTicketId:")
     ):
+        competition_id, ticket_id = payment.memo[len("BookieTicketId:"):].split(".") + [""]
         await api_ticket_send_ticket(
-            payment.memo,
-            payment.payment_hash,
+            competition_id,
+            ticket_id,
         )
     return

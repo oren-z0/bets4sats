@@ -9,14 +9,14 @@ from .models import CreateCompetition, Competitions, Tickets
 
 
 async def create_ticket(
-    payment_hash: str, wallet: str, competition: str, amount: int, reward_target: str
+    ticket_id: str, wallet: str, competition: str, amount: int, reward_target: str
 ) -> Tickets:
     await db.execute(
         """
         INSERT INTO bookie.ticket (id, wallet, competition, amount, reward_target)
         VALUES (?, ?, ?, ?, ?)
         """,
-        (payment_hash, wallet, competition, amount, reward_target),
+        (ticket_id, wallet, competition, amount, reward_target),
     )
 
     # UPDATE COMPETITION DATA ON SOLD TICKET
@@ -33,13 +33,13 @@ async def create_ticket(
         (sold, amount_tickets, competition),
     )
 
-    ticket = await get_ticket(payment_hash)
+    ticket = await get_ticket(ticket_id)
     assert ticket, "Newly created ticket couldn't be retrieved"
     return ticket
 
 
-async def get_ticket(payment_hash: str) -> Optional[Tickets]:
-    row = await db.fetchone("SELECT * FROM bookie.ticket WHERE id = ?", (payment_hash,))
+async def get_ticket(ticket_id: str) -> Optional[Tickets]:
+    row = await db.fetchone("SELECT * FROM bookie.ticket WHERE id = ?", (ticket_id,))
     return Tickets(**row) if row else None
 
 
@@ -54,8 +54,8 @@ async def get_tickets(wallet_ids: Union[str, List[str]]) -> List[Tickets]:
     return [Tickets(**row) for row in rows]
 
 
-async def delete_ticket(payment_hash: str) -> None:
-    await db.execute("DELETE FROM bookie.ticket WHERE id = ?", (payment_hash,))
+async def delete_ticket(ticket_id: str) -> None:
+    await db.execute("DELETE FROM bookie.ticket WHERE id = ?", (ticket_id,))
 
 
 async def delete_competition_tickets(competition_id: str) -> None:

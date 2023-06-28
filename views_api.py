@@ -1,11 +1,14 @@
 from http import HTTPStatus
 
 from fastapi import Depends, Query
+import shortuuid
 from starlette.exceptions import HTTPException
 
-from lnbits.core.crud import get_user, get_standalone_payment
+from lnbits.core.crud import get_user, get_standalone_payment, get_payments
+from lnbits.core.models import PaymentFilters
 from lnbits.core.services import create_invoice
 from lnbits.core.views.api import api_payment
+from lnbits.db import Filters, Filter
 from lnbits.decorators import WalletTypeInfo, get_key_type
 
 from . import bookie_ext
@@ -106,20 +109,21 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Amount must be between Min-Bet and Max-Bet"
         )
+    ticket_id = shortuuid.random()
     try:
-        payment_hash, payment_request = await create_invoice(
+        _payment_hash, payment_request = await create_invoice(
             wallet_id=competition.wallet,
             amount=data.amount,
-            memo=f"{competition_id}",
-            extra={"tag": "bookie", "name": "", "reward_target": data.reward_target},
+            memo=f"BookieTicketId:{competition_id}.{ticket_id}",
+            extra={"tag": "bookie", "reward_target": data.reward_target},
         )
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
-    return {"payment_hash": payment_hash, "payment_request": payment_request}
+    return {"ticket_id": ticket_id, "payment_request": payment_request}
 
 
-@bookie_ext.get("/api/v1/tickets/{competition_id}/{payment_hash}")
-async def api_ticket_send_ticket(competition_id, payment_hash):
+@bookie_ext.get("/api/v1/tickets/{competition_id}/{ticket_id}")
+async def api_ticket_send_ticket(competition_id, ticket_id):
     competition = await get_competition(competition_id)
     if not competition:
         raise HTTPException(
@@ -127,35 +131,39 @@ async def api_ticket_send_ticket(competition_id, payment_hash):
             detail="Competition could not be fetched.",
         )
 
-    status = await api_payment(payment_hash)
-    if status["paid"]:
-
-        exists = await get_ticket(payment_hash)
-        if exists:
-            return {"paid": True, "ticket_id": exists.id}
-        
-        payment = await get_standalone_payment(
-            payment_hash, wallet_id=competition.wallet
+    all_payments = await get_payments(
+        wallet_id=competition.wallet,
+        incoming=True,
+        limit=1,
+        filters=Filters(
+            filters=[Filter(
+              field="memo",
+              values=[f"BookieTicketId:{competition_id}.{ticket_id}"],
+              model=PaymentFilters
+            )],
+            model=PaymentFilters,
         )
-        if not payment:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail="Payment could not be fetched.",
-            )
-
-        ticket = await create_ticket(
-            payment_hash=payment_hash,
-            wallet=competition.wallet,
-            competition=competition_id,
-            amount=payment.sat,
-            reward_target=str(payment.extra.get("reward_target")),
-        )
-        if not ticket:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail="Competition could not be fetched.",
-            )
-        return {"paid": True, "ticket_id": ticket.id}
+    )
+    if not all_payments:
+        raise HTTPException(
+              status_code=HTTPStatus.NOT_FOUND,
+              detail="Payment of given ticket-id could not be fetched.",
+          )
+    payment, = all_payments
+    if payment.pending:
+        await payment.check_status()
+    if payment.pending:
+        return {"paid": False}
+    exists = await get_ticket(ticket_id)
+    if exists:
+        return {"paid": True}
+    await create_ticket(
+        ticket_id=ticket_id,
+        wallet=competition.wallet,
+        competition=competition_id,
+        amount=payment.sat,
+        reward_target=str(payment.extra.get("reward_target")),
+    )
     return {"paid": False}
 
 

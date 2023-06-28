@@ -143,7 +143,7 @@
           )
           .then(function (response) {
             self.paymentReq = response.data.payment_request
-            self.paymentCheck = response.data.payment_hash
+            self.ticketId = response.data.ticket_id
 
             dismissMsg = self.$q.notify({
               timeout: 0,
@@ -161,7 +161,7 @@
                 .get(
                   '/bookie/api/v1/tickets/' +
                     '{{ competition_id }}/' +
-                    self.paymentCheck
+                    self.ticketId
                 )
                 .then(function (res) {
                   if (res.data.paid) {
@@ -184,12 +184,12 @@
                     self.ticketLink = {
                       show: true,
                       data: {
-                        link: '/bookie/ticket/' + res.data.ticket_id
+                        link: '/bookie/ticket/' + self.ticketId
                       }
                     }
                     setTimeout(function () {
                       window.location.href =
-                        '/bookie/ticket/' + res.data.ticket_id
+                        '/bookie/ticket/' + self.ticketId
                     }, 5000)
                   }
                 })
