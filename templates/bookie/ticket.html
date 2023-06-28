@@ -4,7 +4,7 @@
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
         <center>
-          <h3 class="q-my-none">{{ ticket_name }} Ticket</h3>
+          <h3 class="q-my-none">{{ competition_name }} - Ticket</h3>
           <br />
           <h5 class="q-my-none">
             Bookmark, print or screenshot this page,<br />
@@ -20,6 +20,18 @@
           <q-btn @click="printWindow" color="grey" class="q-ml-auto">
             <q-icon left size="3em" name="print"></q-icon> Print</q-btn
           >
+          <h6 class="q-my-none">
+            Competition Id: {{ competition_id }}
+          </h6>
+          <br />
+          <h6 class="q-my-none">
+            Ticket Id: {{ ticket_id }}
+          </h6>
+          <br />
+          <h6 class="q-my-none">
+            Amount: {{ ticket_amount }} sats
+          </h6>
+          <br />
         </center>
       </q-card-section>
     </q-card>

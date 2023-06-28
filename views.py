@@ -82,8 +82,9 @@ async def ticket(request: Request, ticket_id):
         {
             "request": request,
             "ticket_id": ticket_id,
-            "ticket_name": competition.name,
-            "ticket_info": competition.info,
+            "ticket_amount": ticket.amount,
+            "competition_name": competition.name,
+            "competition_id": competition.id,
         },
     )
 
