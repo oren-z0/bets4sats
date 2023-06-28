@@ -33,6 +33,6 @@ class Tickets(BaseModel):
     id: str
     wallet: str
     competition: str
-    amount: str
+    amount: int
     reward_target: str
     time: int
