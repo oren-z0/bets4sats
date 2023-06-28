@@ -135,6 +135,13 @@
             '/bookie/api/v1/register/ticket/' + ticketId
           )
           .then(function (response) {
+            if (response.data.competition !== '{{ competition_id }}') {
+              self.$q.notify({
+                type: 'negative',
+                message: 'Ticket belongs to a different competition'
+              })
+              return
+            }
             self.$q.notify({
               type: 'positive',
               message: 'Found!'
