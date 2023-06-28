@@ -426,6 +426,7 @@
         const data = {
           ...other,
           closing_datetime: `${closing_date}T${closing_time}:00.000Z`,
+          choices: json.dumps([{ "title": "Team A" }, { "title": "Team B" }]),
         }
 
         if (data.id) {
