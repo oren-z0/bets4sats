@@ -490,7 +490,7 @@
         var competitions = _.findWhere(this.competitions, {id: competitionsId})
 
         LNbits.utils
-          .confirmDialog('Are you sure you want to delete this form link?')
+          .confirmDialog('Are you sure you want to delete this competition? First make sure all the winning players have received their prize.')
           .onOk(function () {
             LNbits.api
               .request(
