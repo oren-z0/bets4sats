@@ -271,7 +271,7 @@
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.min_bet == null || formDialog.data.max_bet == null || Number(formDialog.data.max_bet) < Number(formDialog.data.min_bet)"
+            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.min_bet == null || formDialog.data.max_bet == null || Number(formDialog.data.min_bet) <= 0 || Number(formDialog.data.max_bet) < Number(formDialog.data.min_bet) || 21_000_000_00_000_000 <= Number(formDialog.data.max_bet)"
             type="submit"
             >Create Competition</q-btn
           >
