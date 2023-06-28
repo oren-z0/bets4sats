@@ -8,7 +8,7 @@ from loguru import logger
 import shortuuid
 from starlette.exceptions import HTTPException
 
-from lnbits.core.crud import get_user
+from lnbits.core.crud import get_user, create_ticket
 from lnbits.core.services import create_invoice
 from lnbits.decorators import WalletTypeInfo, get_key_type
 
@@ -197,6 +197,15 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
             memo=f"Bets4SatsTicketId:{competition_id}.{ticket_id}",
             extra={"tag": "bets4sats", "reward_target": data.reward_target, "choice": data.choice},
         )
+        await create_ticket(
+            ticket_id=ticket_id,
+            wallet=competition.wallet,
+            competition=competition_id,
+            amount=data.amount,
+            reward_target=str(data.reward_target),
+            choice=int(data.choice)
+        )
+        # TODO: Delete ticket if invoice expires.
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
     return {"ticket_id": ticket_id, "payment_request": payment_request}
