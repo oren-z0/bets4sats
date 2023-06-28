@@ -9,14 +9,14 @@ from .models import CreateCompetition, Competitions, Tickets
 
 
 async def create_ticket(
-    payment_hash: str, wallet: str, competition: str, name: str, reward_target: str
+    payment_hash: str, wallet: str, competition: str, amount: int, reward_target: str
 ) -> Tickets:
     await db.execute(
         """
-        INSERT INTO bookie.ticket (id, wallet, competition, name, reward_target, paid)
+        INSERT INTO bookie.ticket (id, wallet, competition, amount, reward_target, paid)
         VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (payment_hash, wallet, competition, name, reward_target, True),
+        (payment_hash, wallet, competition, amount, reward_target, True),
     )
 
     # UPDATE COMPETITION DATA ON SOLD TICKET

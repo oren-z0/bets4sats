@@ -28,7 +28,7 @@ async def m002_changed(db):
             id TEXT PRIMARY KEY,
             wallet TEXT NOT NULL,
             competition TEXT NOT NULL,
-            name TEXT NOT NULL,
+            amount INTEGER NOT NULL,
             reward_target TEXT NOT NULL,
             paid BOOLEAN NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """

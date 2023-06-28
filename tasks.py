@@ -4,7 +4,6 @@ from lnbits.core.models import Payment
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
-from .models import CreateTicket
 from .views_api import api_ticket_send_ticket
 
 
@@ -22,15 +21,10 @@ async def on_invoice_paid(payment: Payment) -> None:
     if (
         payment.extra
         and "bookie" == payment.extra.get("tag")
-        and payment.extra.get("name")
         and payment.extra.get("reward_target")
     ):
         await api_ticket_send_ticket(
             payment.memo,
             payment.payment_hash,
-            CreateTicket(
-                name=str(payment.extra.get("name")),
-                reward_target=str(payment.extra.get("reward_target")),
-            ),
         )
     return

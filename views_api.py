@@ -147,7 +147,7 @@ async def api_ticket_send_ticket(competition_id, payment_hash):
             payment_hash=payment_hash,
             wallet=competition.wallet,
             competition=competition_id,
-            name=str(payment.extra.get("name")),
+            amount=payment.sat,
             reward_target=str(payment.extra.get("reward_target")),
         )
         if not ticket:

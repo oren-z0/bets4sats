@@ -12,11 +12,6 @@ class CreateCompetition(BaseModel):
     min_bet: int = Query(..., gt=0, lt=MAX_SATS)
     max_bet: int = Query(..., gt=0, lt=MAX_SATS)
 
-
-class CreateTicket(BaseModel):
-    name: str
-    reward_target: str
-
 class CreateInvoiceForTicket(BaseModel):
     reward_target: str
     amount: int
@@ -38,7 +33,7 @@ class Tickets(BaseModel):
     id: str
     wallet: str
     competition: str
-    name: str
+    amount: str
     reward_target: str
     paid: bool
     time: int
