@@ -193,9 +193,4 @@ async def api_competition_register_ticket(ticket_id):
             status_code=HTTPStatus.NOT_FOUND, detail="Ticket does not exist."
         )
 
-    if not ticket.paid:
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail="Ticket not paid for."
-        )
-
     return ticket.dict()

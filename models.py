@@ -35,5 +35,4 @@ class Tickets(BaseModel):
     competition: str
     amount: str
     reward_target: str
-    paid: bool
     time: int

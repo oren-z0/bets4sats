@@ -13,10 +13,10 @@ async def create_ticket(
 ) -> Tickets:
     await db.execute(
         """
-        INSERT INTO bookie.ticket (id, wallet, competition, amount, reward_target, paid)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO bookie.ticket (id, wallet, competition, amount, reward_target)
+        VALUES (?, ?, ?, ?, ?)
         """,
-        (payment_hash, wallet, competition, amount, reward_target, True),
+        (payment_hash, wallet, competition, amount, reward_target),
     )
 
     # UPDATE COMPETITION DATA ON SOLD TICKET
