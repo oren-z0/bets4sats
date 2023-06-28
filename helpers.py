@@ -155,7 +155,14 @@ async def send_ticket(competition_id, ticket_id):
             status_code=HTTPStatus.NOT_FOUND,
             detail="Competition could not be fetched.",
         )
-
+    ticket = await get_ticket(ticket_id)
+    if not ticket or ticket.competition_id != competition_id:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Ticket could not be fetched.",
+        )
+    # TODO: Save payment-hash on ticket, so we could use get_standalone_payment()
+    # instead of get_payments()
     all_payments = await get_payments(
         wallet_id=competition.wallet,
         incoming=True,
@@ -177,24 +184,4 @@ async def send_ticket(competition_id, ticket_id):
     payment, = all_payments
     if payment.pending:
         await payment.check_status()
-    if payment.pending:
-        return {"paid": False}
-    exists = await get_ticket(ticket_id)
-    if exists:
-        return {"paid": True}
-    # Danger: Not safe against parallel requests
-    if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail="Competition is close for new tickets. If you think you should get a refund, please contact the admin."
-        )
-
-    await create_ticket(
-        ticket_id=ticket_id,
-        wallet=competition.wallet,
-        competition=competition_id,
-        amount=payment.sat,
-        reward_target=str(payment.extra.get("reward_target")),
-        choice=int(payment.extra.get("choice"))
-    )
-    return {"paid": True}
+    return {"paid": not payment.pending}
