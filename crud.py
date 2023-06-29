@@ -14,7 +14,7 @@ async def create_ticket(
 ) -> Tickets:
     await db.execute(
         """
-        INSERT INTO bookie.ticket (id, wallet, competition, amount, reward_target)
+        INSERT INTO bookie.tickets (id, wallet, competition, amount, reward_target)
         VALUES (?, ?, ?, ?, ?)
         """,
         (ticket_id, wallet, competition, amount, reward_target),
@@ -40,7 +40,7 @@ async def create_ticket(
 
 
 async def get_ticket(ticket_id: str) -> Optional[Tickets]:
-    row = await db.fetchone("SELECT * FROM bookie.ticket WHERE id = ?", (ticket_id,))
+    row = await db.fetchone("SELECT * FROM bookie.tickets WHERE id = ?", (ticket_id,))
     return Tickets(**row) if row else None
 
 
@@ -50,17 +50,17 @@ async def get_tickets(wallet_ids: Union[str, List[str]]) -> List[Tickets]:
 
     q = ",".join(["?"] * len(wallet_ids))
     rows = await db.fetchall(
-        f"SELECT * FROM bookie.ticket WHERE wallet IN ({q})", (*wallet_ids,)
+        f"SELECT * FROM bookie.tickets WHERE wallet IN ({q})", (*wallet_ids,)
     )
     return [Tickets(**row) for row in rows]
 
 
 async def delete_ticket(ticket_id: str) -> None:
-    await db.execute("DELETE FROM bookie.ticket WHERE id = ?", (ticket_id,))
+    await db.execute("DELETE FROM bookie.tickets WHERE id = ?", (ticket_id,))
 
 
 async def delete_competition_tickets(competition_id: str) -> None:
-    await db.execute("DELETE FROM bookie.ticket WHERE competition = ?", (competition_id,))
+    await db.execute("DELETE FROM bookie.tickets WHERE competition = ?", (competition_id,))
 
 
 # COMPETITIONS
@@ -135,7 +135,7 @@ async def delete_competition(competition_id: str) -> None:
 
 async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) -> List[Tickets]:
     rows = await db.fetchall(
-        "SELECT * FROM bookie.ticket WHERE wallet = ? AND competition = ?",
+        "SELECT * FROM bookie.tickets WHERE wallet = ? AND competition = ?",
         (wallet_id, competition_id),
     )
     return [Tickets(**row) for row in rows]
