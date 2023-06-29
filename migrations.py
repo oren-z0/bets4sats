@@ -12,6 +12,9 @@ async def m001_initial(db):
             min_bet INTEGER NOT NULL,
             max_bet INTEGER NOT NULL,
             sold INTEGER NOT NULL,
+            choices TEXT NOT NULL,
+            winning_choice INTEGER NOT NULL,
+            state TEXT NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
         + """
