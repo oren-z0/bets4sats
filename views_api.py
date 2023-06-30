@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from datetime import datetime
 
 from fastapi import Depends, Query
 import shortuuid
@@ -105,6 +106,11 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
+    if competition.state != "INITIAL" or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Competition is close for new tickets."
+        )    
     if data.amount < competition.min_bet or data.amount > competition.max_bet:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Amount must be between Min-Bet and Max-Bet"
@@ -157,6 +163,12 @@ async def api_ticket_send_ticket(competition_id, ticket_id):
     exists = await get_ticket(ticket_id)
     if exists:
         return {"paid": True}
+    if competition.state != "INITIAL" or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Competition is close for new tickets. If you think you should get a refund, please contact the admin."
+        )
+
     await create_ticket(
         ticket_id=ticket_id,
         wallet=competition.wallet,
