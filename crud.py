@@ -4,14 +4,14 @@ import json
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
-from .models import CreateCompetition, Competition, Tickets
+from .models import CreateCompetition, Competition, Ticket
 
 # TICKETS
 
 
 async def create_ticket(
     ticket_id: str, wallet: str, competition: str, amount: int, reward_target: str
-) -> Tickets:
+) -> Ticket:
     await db.execute(
         """
         INSERT INTO bookie.tickets (id, wallet, competition, amount, reward_target)
@@ -39,12 +39,12 @@ async def create_ticket(
     return ticket
 
 
-async def get_ticket(ticket_id: str) -> Optional[Tickets]:
+async def get_ticket(ticket_id: str) -> Optional[Ticket]:
     row = await db.fetchone("SELECT * FROM bookie.tickets WHERE id = ?", (ticket_id,))
-    return Tickets(**row) if row else None
+    return Ticket(**row) if row else None
 
 
-async def get_tickets(wallet_ids: Union[str, List[str]]) -> List[Tickets]:
+async def get_tickets(wallet_ids: Union[str, List[str]]) -> List[Ticket]:
     if isinstance(wallet_ids, str):
         wallet_ids = [wallet_ids]
 
@@ -52,7 +52,7 @@ async def get_tickets(wallet_ids: Union[str, List[str]]) -> List[Tickets]:
     rows = await db.fetchall(
         f"SELECT * FROM bookie.tickets WHERE wallet IN ({q})", (*wallet_ids,)
     )
-    return [Tickets(**row) for row in rows]
+    return [Ticket(**row) for row in rows]
 
 
 async def delete_ticket(ticket_id: str) -> None:
@@ -133,9 +133,9 @@ async def delete_competition(competition_id: str) -> None:
 # COMPETITIONTICKETS
 
 
-async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) -> List[Tickets]:
+async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) -> List[Ticket]:
     rows = await db.fetchall(
         "SELECT * FROM bookie.tickets WHERE wallet = ? AND competition = ?",
         (wallet_id, competition_id),
     )
-    return [Tickets(**row) for row in rows]
+    return [Ticket(**row) for row in rows]

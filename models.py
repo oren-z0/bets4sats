@@ -33,7 +33,7 @@ class Competition(BaseModel):
     time: int
 
 
-class Tickets(BaseModel):
+class Ticket(BaseModel):
     id: str
     wallet: str
     competition: str
