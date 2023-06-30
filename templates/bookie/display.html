@@ -31,7 +31,9 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>
+                  {% raw %}
                   {{ choice.title }} (total bets: {{ choice.total }} sats)
+                  {% endraw %}
                   <strong v-if="choice.won">- WON!</strong>
                 </q-item-label>
               </q-item-section>
