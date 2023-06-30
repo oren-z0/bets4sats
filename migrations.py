@@ -31,7 +31,7 @@ async def m002_changed(db):
             competition TEXT NOT NULL,
             amount INTEGER NOT NULL,
             reward_target TEXT NOT NULL,
-            choice: INTEGER NOT NULL,
+            choice INTEGER NOT NULL,
             state TEXT NOT NULL,
             reward_failure TEXT NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
