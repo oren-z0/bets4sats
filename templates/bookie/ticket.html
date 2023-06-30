@@ -11,15 +11,16 @@
             and present it in case of a dispute!
           </h5>
           <br />
-
-          <qrcode
-            :value="'bookie://{{ ticket_id }}'"
-            :options="{width: 500}"
-          ></qrcode>
+          <q-responsive :ratio="1" class="q-mb-md" style="max-width: 300px">
+            <qrcode
+              :value="'bookie://{{ ticket_id }}'"
+              :options="{width: 500}"
+            ></qrcode>
+          </q-responsive>
           <br />
           <q-btn @click="printWindow" color="grey" class="q-ml-auto">
-            <q-icon left size="3em" name="print"></q-icon> Print</q-btn
-          >
+            <q-icon left size="3em" name="print"></q-icon> Print
+          </q-btn>
           <h6 class="q-my-none">
             Competition Id: {{ competition_id }}
           </h6>

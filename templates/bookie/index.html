@@ -369,9 +369,7 @@
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
-            console.log(response)
             self.tickets = response.data.map(function (obj) {
-              console.log(obj)
               return mapCompetitions(obj)
             })
           })
@@ -451,16 +449,12 @@
       },
       updateformDialog: function (formId) {
         var link = _.findWhere(this.competitions, {id: formId})
-        console.log(link.id)
-        this.formDialog.data.id = link.id
-        this.formDialog.data.wallet = link.wallet
-        this.formDialog.data.name = link.name
-        this.formDialog.data.info = link.info
-        this.formDialog.data.closing_date = link.closing_datetime.split('T')[0]
-        this.formDialog.data.closing_time = link.closing_datetime.split('T')[1].slice(0, 5)
-        this.formDialog.data.amount_tickets = link.amount_tickets
-        this.formDialog.data.min_bet = link.min_bet
-        this.formDialog.data.max_bet = link.max_bet
+        const { closing_datetime, ...data } = link;
+        this.formDialog.data = {
+          ...data,
+          closing_date: closing_datetime.split('T')[0],
+          closing_time: closing_datetime.split('T')[1].slice(0, 5),
+        }
         this.formDialog.show = true
       },
       updateCompetition: function (wallet, data) {
