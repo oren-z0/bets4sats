@@ -30,26 +30,6 @@ async def display(request: Request, competition_id):
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
 
-    if competition.amount_tickets < 1:
-        return bookie_renderer().TemplateResponse(
-            "bookie/error.html",
-            {
-                "request": request,
-                "competition_name": competition.name,
-                "competition_error": "Sorry, tickets are sold out :(",
-            },
-        )
-    datetime_object = datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
-    if datetime.utcnow() > datetime_object:
-        return bookie_renderer().TemplateResponse(
-            "bookie/error.html",
-            {
-                "request": request,
-                "competition_name": competition.name,
-                "competition_error": "Sorry, ticket closing date has passed :(",
-            },
-        )
-
     return bookie_renderer().TemplateResponse(
         "bookie/display.html",
         {
@@ -57,6 +37,10 @@ async def display(request: Request, competition_id):
             "competition_id": competition_id,
             "competition_name": competition.name,
             "competition_info": competition.info,
+            "competition_state": competition.state,
+            "competition_closing_datetime": competition.closing_datetime,
+            "competition_choices": competition.choices,
+            "competition_amount_tickets": competition.amount_tickets,
             "competition_min_bet": competition.min_bet,
             "competition_max_bet": competition.max_bet,
         },

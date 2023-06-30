@@ -11,7 +11,7 @@ from .models import CreateCompetition, Competition, Ticket
 
 async def create_ticket(
     ticket_id: str, wallet: str, competition: str, amount: int, reward_target: str,
-    choice: int = 0,
+    choice: int,
 ) -> Ticket:
     await db.execute(
         """

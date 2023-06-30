@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from datetime import datetime
+import json
 
 from fastapi import Depends, Query
 import shortuuid
@@ -106,7 +107,7 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
-    if competition.state != "INITIAL" or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
+    if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
             detail="Competition is close for new tickets."
@@ -115,13 +116,17 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Amount must be between Min-Bet and Max-Bet"
         )
+    if data.choice < 0 or data.choice >= len(json.loads(competition.choices)):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Invalid choice"
+        )
     ticket_id = shortuuid.random()
     try:
         _payment_hash, payment_request = await create_invoice(
             wallet_id=competition.wallet,
             amount=data.amount,
             memo=f"BookieTicketId:{competition_id}.{ticket_id}",
-            extra={"tag": "bookie", "reward_target": data.reward_target},
+            extra={"tag": "bookie", "reward_target": data.reward_target, "choice": data.choice},
         )
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
@@ -163,7 +168,7 @@ async def api_ticket_send_ticket(competition_id, ticket_id):
     exists = await get_ticket(ticket_id)
     if exists:
         return {"paid": True}
-    if competition.state != "INITIAL" or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
+    if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
             detail="Competition is close for new tickets. If you think you should get a refund, please contact the admin."
@@ -175,8 +180,9 @@ async def api_ticket_send_ticket(competition_id, ticket_id):
         competition=competition_id,
         amount=payment.sat,
         reward_target=str(payment.extra.get("reward_target")),
+        choice=int(payment.extra.get("choice"))
     )
-    return {"paid": False}
+    return {"paid": True}
 
 
 @bookie_ext.delete("/api/v1/tickets/{ticket_id}")

@@ -16,6 +16,7 @@ class CreateCompetition(BaseModel):
 class CreateInvoiceForTicket(BaseModel):
     reward_target: str
     amount: int
+    choice: int
 
 class Competition(BaseModel):
     id: str

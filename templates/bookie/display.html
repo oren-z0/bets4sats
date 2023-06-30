@@ -5,10 +5,40 @@
       <q-card-section class="q-pa-none">
         <h3 class="q-my-none">{{ competition_name }}</h3>
         <br />
+        <h5 class="q-my-none">
+          DISCLAIMER: This server does not use external sources to check the competition results.
+          It simply trusts the server admin to enter the truthful results. This means that the
+          server admin and node operator could technically steal your funds. Use this app only if
+          you trust the server admin and node operator not to cheat.
+        </h5>
+        <br />
         <h5 class="q-my-none">{{ competition_info }}</h5>
         <br />
+        <div v-if="!isCompetitionOpen">
+          <h4 class="q-my-none">Competition is closed for new bets.</h4>
+          <br/>
+        </div>
         <q-form @submit="Invoice()" class="q-gutter-md">
+          <q-list>
+            <q-item
+              v-for="(choice, index) in choices"
+              :key="choice.title"
+              tag="label"
+              v-ripple
+            >
+              <q-item-section avatar v-if="isCompetitionOpen">
+                <q-radio v-model="formDialog.data.choice" :val="index"></q-radio>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>
+                  {{choice.title}} (total bets: {{choice.total}} sats)
+                  <strong v-if="choice.won">- WON!</strong>
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
           <q-input
+            v-if="isCompetitionOpen"
             filled
             dense
             v-model.number="formDialog.data.amount"
@@ -16,6 +46,7 @@
             label="Amount in sats (between {{ competition_min_bet }} - {{ competition_max_bet }}) "
           ></q-input>
           <q-input
+            v-if="isCompetitionOpen"
             filled
             dense
             v-model.trim="formDialog.data.reward_target"
@@ -23,17 +54,23 @@
             label="Your lightning-address "
           ></q-input>
 
-          <div class="row q-mt-lg">
+          <div class="row q-mt-lg" v-if="isCompetitionOpen">
             <q-btn
               unelevated
               color="primary"
               :disable="formDialog.data.reward_target == '' || !formDialog.data.amount || Number(formDialog.data.amount) < {{ competition_min_bet }} || Number(formDialog.data.amount) > {{ competition_max_bet }} || paymentReq"
               type="submit"
-              >Submit</q-btn
             >
-            <q-btn @click="resetForm" flat color="grey" class="q-ml-auto"
-              >Cancel</q-btn
+              Submit
+            </q-btn>
+            <q-btn
+              @click="resetForm"
+              flat
+              color="grey"
+              class="q-ml-auto"
             >
+              Cancel
+            </q-btn>
           </div>
         </q-form>
       </q-card-section>
@@ -94,13 +131,16 @@
     mixins: [windowMixin],
     data: function () {
       return {
+        isCompetitionOpen: '{{ competition_state }}' === 'INITIAL' && Number('{{ competition_amount_tickets }}') > 0 && Date.now() < new Date('{{ competition_closing_datetime }}').getTime(),
+        choices: competition_choices,
         paymentReq: null,
         redirectUrl: null,
         formDialog: {
           show: false,
           data: {
             amount: 0,
-            reward_target: ''
+            reward_target: '',
+            choice: 0,
           }
         },
         ticketLink: {
@@ -117,19 +157,31 @@
       }
     },
 
+    mounted: function () {
+      const timeToClose = new Date('{{ competition_closing_datetime }}').getTime() - Date.now()
+      console.info('timeToClose', timeToClose)
+      if (timeToClose > 0) {
+        setTimeout(() => {
+          console.info('closing due to timeout')
+          this.isCompetitionOpen = false
+        }, timeToClose)
+      }
+    },
+
     methods: {
       resetForm: function (e) {
         e.prcompetitionDefault()
-        this.formDialog.data.amount = 0
-        this.formDialog.data.reward_target = ''
+        this.formDialog.data = {
+          amount: 0,
+          reward_target: '',
+          choice: 0,
+        }
       },
 
       closeReceiveDialog: function () {
         var checker = this.receive.paymentChecker
         dismissMsg()
-
         clearInterval(paymentChecker)
-        setTimeout(function () {}, 10000)
       },
       Invoice: function () {
         var self = this
@@ -138,7 +190,8 @@
             '/bookie/api/v1/tickets/{{ competition_id }}',
             {
               reward_target: self.formDialog.data.reward_target,
-              amount: self.formDialog.data.amount,
+              amount: Number(self.formDialog.data.amount),
+              choice: Number(self.formDialog.data.choice), // safety
             }
           )
           .then(function (response) {
