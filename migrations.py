@@ -1,5 +1,4 @@
 async def m001_initial(db):
-
     await db.execute(
         """
         CREATE TABLE bookie.competitions (
@@ -24,7 +23,6 @@ async def m001_initial(db):
 
 
 async def m002_changed(db):
-
     await db.execute(
         """
         CREATE TABLE bookie.tickets (
@@ -33,6 +31,9 @@ async def m002_changed(db):
             competition TEXT NOT NULL,
             amount INTEGER NOT NULL,
             reward_target TEXT NOT NULL,
+            choice: INTEGER NOT NULL,
+            state TEXT NOT NULL,
+            reward_failure TEXT NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
         + """

@@ -10,29 +10,33 @@ from .models import CreateCompetition, Competition, Ticket
 
 
 async def create_ticket(
-    ticket_id: str, wallet: str, competition: str, amount: int, reward_target: str
+    ticket_id: str, wallet: str, competition: str, amount: int, reward_target: str,
+    choice: int = 0,
 ) -> Ticket:
     await db.execute(
         """
-        INSERT INTO bookie.tickets (id, wallet, competition, amount, reward_target)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO bookie.tickets (id, wallet, competition, amount, reward_target, choice, state, reward_failure)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (ticket_id, wallet, competition, amount, reward_target),
+        (ticket_id, wallet, competition, amount, reward_target, choice, "INITIAL", ""),
     )
 
     # UPDATE COMPETITION DATA ON SOLD TICKET
-    competitiondata = await get_competition(competition)
-    assert competitiondata, "Couldn't get competition from ticket being paid"
-    sold = competitiondata.sold + 1
-    amount_tickets = competitiondata.amount_tickets - 1
-    await db.execute(
-        """
-        UPDATE bookie.competitions
-        SET sold = ?, amount_tickets = ?
-        WHERE id = ?
-        """,
-        (sold, amount_tickets, competition),
-    )
+    while True:
+      competitiondata = await get_competition(competition)
+      assert competitiondata, "Couldn't get competition from ticket being paid"
+      sold = competitiondata.sold + 1
+      amount_tickets = competitiondata.amount_tickets - 1
+      update_result = await db.execute(
+          """
+          UPDATE bookie.competitions
+          SET sold = ?, amount_tickets = ?
+          WHERE id = ? AND amount_tickets = ?
+          """,
+          (sold, amount_tickets, competition, competitiondata.amount_tickets),
+      )
+      if update_result.rowcount > 0:
+          break
 
     ticket = await get_ticket(ticket_id)
     assert ticket, "Newly created ticket couldn't be retrieved"

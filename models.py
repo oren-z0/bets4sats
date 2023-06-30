@@ -39,4 +39,7 @@ class Ticket(BaseModel):
     competition: str
     amount: int
     reward_target: str
+    choice: int
+    state: str
+    reward_failure: str
     time: int
