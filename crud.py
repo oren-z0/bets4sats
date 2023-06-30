@@ -27,13 +27,15 @@ async def create_ticket(
       assert competitiondata, "Couldn't get competition from ticket being paid"
       sold = competitiondata.sold + 1
       amount_tickets = competitiondata.amount_tickets - 1
+      choices = json.loads(competitiondata.choices)
+      choices[choice]["total"] += amount
       update_result = await db.execute(
           """
           UPDATE bookie.competitions
-          SET sold = ?, amount_tickets = ?
+          SET sold = ?, amount_tickets = ?, choices = ?
           WHERE id = ? AND amount_tickets = ?
           """,
-          (sold, amount_tickets, competition, competitiondata.amount_tickets),
+          (sold, amount_tickets, json.dumps(choices), competition, competitiondata.amount_tickets),
       )
       if update_result.rowcount > 0:
           break
