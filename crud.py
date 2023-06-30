@@ -4,7 +4,7 @@ import json
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
-from .models import CreateCompetition, Competitions, Tickets
+from .models import CreateCompetition, Competition, Tickets
 
 # TICKETS
 
@@ -66,7 +66,7 @@ async def delete_competition_tickets(competition_id: str) -> None:
 # COMPETITIONS
 
 
-async def create_competition(data: CreateCompetition) -> Competitions:
+async def create_competition(data: CreateCompetition) -> Competition:
     choices = json.loads(data.choices)
     assert isinstance(choices, list), "choices must be a list"
     assert len(choices) >= 2, "choices must have at least two elements"
@@ -99,7 +99,7 @@ async def create_competition(data: CreateCompetition) -> Competitions:
     return competition
 
 
-async def update_competition(competition_id: str, **kwargs) -> Competitions:
+async def update_competition(competition_id: str, **kwargs) -> Competition:
     q = ", ".join([f"{field[0]} = ?" for field in kwargs.items()])
     await db.execute(
         f"UPDATE bookie.competitions SET {q} WHERE id = ?", (*kwargs.values(), competition_id)
@@ -109,12 +109,12 @@ async def update_competition(competition_id: str, **kwargs) -> Competitions:
     return competition
 
 
-async def get_competition(competition_id: str) -> Optional[Competitions]:
+async def get_competition(competition_id: str) -> Optional[Competition]:
     row = await db.fetchone("SELECT * FROM bookie.competitions WHERE id = ?", (competition_id,))
-    return Competitions(**row) if row else None
+    return Competition(**row) if row else None
 
 
-async def get_competitions(wallet_ids: Union[str, List[str]]) -> List[Competitions]:
+async def get_competitions(wallet_ids: Union[str, List[str]]) -> List[Competition]:
     if isinstance(wallet_ids, str):
         wallet_ids = [wallet_ids]
 
@@ -123,7 +123,7 @@ async def get_competitions(wallet_ids: Union[str, List[str]]) -> List[Competitio
         f"SELECT * FROM bookie.competitions WHERE wallet IN ({q})", (*wallet_ids,)
     )
 
-    return [Competitions(**row) for row in rows]
+    return [Competition(**row) for row in rows]
 
 
 async def delete_competition(competition_id: str) -> None:

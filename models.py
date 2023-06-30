@@ -17,7 +17,7 @@ class CreateInvoiceForTicket(BaseModel):
     reward_target: str
     amount: int
 
-class Competitions(BaseModel):
+class Competition(BaseModel):
     id: str
     wallet: str
     name: str
