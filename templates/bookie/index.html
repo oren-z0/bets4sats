@@ -209,7 +209,7 @@
           label="Info about the competition "
         ></q-input>
         <div class="row">
-          <div class="col-12">Choices</div>
+          <div class="col-12">Choices:</div>
         </div>
         <div class="row" v-for="(choice, index) in formDialog.data.choices">
           <div class="col-11">
@@ -224,7 +224,7 @@
             <q-btn
               flat
               dense
-              size="sm"
+              size="md"
               @click="deleteChoice(index)"
               icon="cancel"
               color="pink"
@@ -239,7 +239,7 @@
             @click="addChoice"
             size="sm"
           >
-            Add Choice
+            Add New Choice
           </q-btn>
         </div>
         <div class="row">
