@@ -73,11 +73,6 @@ async def delete_competition_tickets(competition_id: str) -> None:
 
 
 async def create_competition(data: CreateCompetition) -> Competition:
-    choices = json.loads(data.choices)
-    assert isinstance(choices, list), "choices must be a list"
-    assert len(choices) >= 2, "choices must have at least two elements"
-    assert all(isinstance(choice, dict) and isinstance(choice.get("title"), str) for choice in choices), "choices title must be a string"
-
     competition_id = urlsafe_short_hash()
     await db.execute(
         """
@@ -94,7 +89,7 @@ async def create_competition(data: CreateCompetition) -> Competition:
             data.min_bet,
             data.max_bet,
             0,
-            json.dumps([{ "title": choice["title"], "total": 0 } for choice in choices]),
+            json.dumps([{ "title": choice["title"], "total": 0 } for choice in json.loads(data.choices)]),
             -1,
             "INITIAL"
         ),

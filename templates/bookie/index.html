@@ -475,7 +475,7 @@
         const data = {
           ...other,
           closing_datetime: `${closing_date}T${closing_time}:00.000Z`,
-          choices: JSON.stringify(choices),
+          choices: JSON.stringify(choices.filter(choice => choice.title)),
         }
 
         if (data.id) {

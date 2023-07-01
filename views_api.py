@@ -50,6 +50,14 @@ async def api_competitions(
 async def api_competition_create(
     data: CreateCompetition, competition_id=None, wallet: WalletTypeInfo = Depends(get_key_type)
 ):
+    choices = json.loads(data.choices)
+    if not isinstance(choices, list):
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Choices must be a list")
+    if not all(isinstance(choice, dict) and isinstance(choice.get("title"), str) and choice["title"] for choice in choices):
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Choices title must be a non-empty string")
+    if len(choices) < 2:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Must have at least 2 choices")
+
     if competition_id:
         competition = await get_competition(competition_id)
         if not competition:
