@@ -21,7 +21,8 @@ async def on_invoice_paid(payment: Payment) -> None:
     if (
         payment.extra
         and "bookie" == payment.extra.get("tag")
-        and payment.extra.get("reward_target")
+        and isinstance(payment.extra.get("reward_target"), str)
+        and isinstance(payment.extra.get("choice"), int)
         and payment.memo and payment.memo.startswith("BookieTicketId:")
     ):
         competition_id, ticket_id = payment.memo[len("BookieTicketId:"):].split(".") + [""]
