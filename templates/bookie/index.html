@@ -306,7 +306,7 @@
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
             {name: 'name', align: 'left', label: 'Name', field: 'name'},
-            {name: 'info', align: 'left', label: 'Info', field: 'info'},
+            {name: 'state', align: 'left', label: 'State', field: 'state'},
             {
               name: 'closing_datetime',
               align: 'left',
@@ -336,6 +336,12 @@
               align: 'left',
               label: 'Sold',
               field: 'sold'
+            },
+            {
+              name: 'winning_choice',
+              align: 'left',
+              label: 'Winning choice',
+              field: 'winning_choice'
             }
           ],
           pagination: {
@@ -346,8 +352,11 @@
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
             {name: 'competition', align: 'left', label: 'Competition', field: 'competition'},
+            {name: 'state', align: 'left', label: 'State', field: 'state'},
             {name: 'reward_target', align: 'left', label: 'Reward Target', field: 'reward_target'},
-            {name: 'amount', align: 'left', label: 'Amount (sats)', field: 'amount'}
+            {name: 'amount', align: 'left', label: 'Amount (sats)', field: 'amount'},
+            {name: 'choice', align: 'left', label: 'Choice', field: 'choice'},
+            {name: 'reward_failure', align: 'left', label: 'Reward failure', field: 'reward_failure'}
           ],
           pagination: {
             rowsPerPage: 10

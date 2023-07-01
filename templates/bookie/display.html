@@ -34,7 +34,7 @@
                   {% raw %}
                   {{ choice.title }} (total bets: {{ choice.total }} sats)
                   {% endraw %}
-                  <strong v-if="choice.won">- WON!</strong>
+                  <strong v-if="index === {{ competition_winning_choice }}">- WON!</strong>
                 </q-item-label>
               </q-item-section>
             </q-item>

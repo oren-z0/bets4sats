@@ -40,6 +40,7 @@ async def display(request: Request, competition_id):
             "competition_state": competition.state,
             "competition_closing_datetime": competition.closing_datetime,
             "competition_choices": competition.choices,
+            "competition_winning_choice": competition.winning_choice,
             "competition_amount_tickets": competition.amount_tickets,
             "competition_min_bet": competition.min_bet,
             "competition_max_bet": competition.max_bet,
