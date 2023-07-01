@@ -125,7 +125,6 @@
 
 {% endblock %} {% block scripts %}
 <script>
-  console.log('{{ form_costpword }}')
   Vue.component(VueQrcode.name, VueQrcode)
 
   new Vue({
@@ -133,8 +132,8 @@
     mixins: [windowMixin],
     data: function () {
       return {
-        isCompetitionOpen: '{{ competition_state }}' === 'INITIAL' && Number('{{ competition_amount_tickets }}') > 0 && Date.now() < new Date('{{ competition_closing_datetime }}').getTime(),
-        choices: competition_choices,
+        isCompetitionOpen: '{{ competition_state }}' === 'INITIAL' && {{ competition_amount_tickets }} > 0 && Date.now() < new Date('{{ competition_closing_datetime }}').getTime(),
+        choices: {{ competition_choices }},
         paymentReq: null,
         redirectUrl: null,
         formDialog: {
