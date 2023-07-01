@@ -43,4 +43,11 @@ class Ticket(BaseModel):
     choice: int
     state: str
     reward_failure: str
+    reward_payment_hash: str
     time: int
+
+class LnurlpParameters(BaseModel):
+    minSendable: int
+    maxSendable: int
+    callback: str
+    commentAllowed: int

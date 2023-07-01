@@ -34,6 +34,7 @@ async def m002_changed(db):
             choice INTEGER NOT NULL,
             state TEXT NOT NULL,
             reward_failure TEXT NOT NULL,
+            reward_payment_hash TEXT NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
         + """
