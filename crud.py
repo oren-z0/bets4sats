@@ -160,3 +160,10 @@ async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) ->
         (wallet_id, competition_id),
     )
     return [Ticket(**row) for row in rows]
+
+async def is_competition_payment_complete(competition_id: str) -> List[Ticket]:
+    rows = await db.fetchall(
+        "SELECT id FROM bookie.tickets WHERE competition = ? AND state != ? AND state != ? AND state != ? AND state != ? LIMIT 1",
+        (competition_id, "CANCELLED_PAID", "CANCELLED_PAYMENT_FAILED", "WON_PAID", "WON_PAYMENT_FAILED"),
+    )
+    return not rows

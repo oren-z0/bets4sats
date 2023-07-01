@@ -6,7 +6,7 @@ from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
 from .views_api import api_ticket_send_ticket
-from .crud import get_ticket, cas_ticket_state, get_competition, update_ticket
+from .crud import get_ticket, cas_ticket_state, get_competition, update_competition, update_ticket, is_competition_payment_complete
 from .helpers import pay_lnurlp
 
 PRIZE_FEE_PERCENT = 1
@@ -64,7 +64,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
         ticket = await get_ticket(ticket_id)
         if not ticket:
             return
-        if ticket.state == "CANCLLED_PAYING":
+        if ticket.state == "CANCELLED_PAYING":
             reward_msat = ticket.amount * 1000
             description_prefix = "BookieCancelled"
         else: # WON_PAYING
@@ -89,14 +89,25 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             }[ticket.state],
             reward_failure=str(exception)
         )
-        return
-    await update_ticket(
-      ticket.id,
-      state={
-          "CANCELLED_PAYING": "CANCELLED_PAID",
-          "WON_PAYING": "WON_PAID"
-      }[ticket.state],
-      reward_failure="",
-      reward_msat=final_reward_msat,
-      reward_payment_hash=payment_hash
-    )
+    else:
+        await update_ticket(
+            ticket.id,
+            state={
+                "CANCELLED_PAYING": "CANCELLED_PAID",
+                "WON_PAYING": "WON_PAID"
+            }[ticket.state],
+            reward_failure="",
+            reward_msat=final_reward_msat,
+            reward_payment_hash=payment_hash
+        )
+    competition_complete = await is_competition_payment_complete(ticket.competition)
+    if competition_complete:
+        competition = await get_competition(ticket.competition)
+        if competition.state in ("COMPLETED_PAYING", "CANCELLED_PAYING"):
+            await update_competition(
+                ticket.competition,
+                state={
+                    "COMPLETED_PAYING": "COMPLETED_PAID",
+                    "CANCELLED_PAYING": "CANCELLED_PAID",
+                }[competition.state]
+            )
