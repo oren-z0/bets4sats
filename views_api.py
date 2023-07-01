@@ -107,19 +107,19 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
-    # if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
-    #     raise HTTPException(
-    #         status_code=HTTPStatus.FORBIDDEN,
-    #         detail="Competition is close for new tickets."
-    #     )    
-    # if data.amount < competition.min_bet or data.amount > competition.max_bet:
-    #     raise HTTPException(
-    #         status_code=HTTPStatus.FORBIDDEN, detail="Amount must be between Min-Bet and Max-Bet"
-    #     )
-    # if data.choice < 0 or data.choice >= len(json.loads(competition.choices)):
-    #     raise HTTPException(
-    #         status_code=HTTPStatus.FORBIDDEN, detail="Invalid choice"
-    #     )
+    if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Competition is close for new tickets."
+        )    
+    if data.amount < competition.min_bet or data.amount > competition.max_bet:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Amount must be between Min-Bet and Max-Bet"
+        )
+    if data.choice < 0 or data.choice >= len(json.loads(competition.choices)):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Invalid choice"
+        )
     ticket_id = shortuuid.random()
     payment_request = None
     try:
