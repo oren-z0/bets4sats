@@ -25,7 +25,7 @@ def bookie_renderer():
     return template_renderer(["lnbits/extensions/bookie/templates"])
 
 
-from .tasks import wait_for_paid_invoices
+from .tasks import wait_for_paid_invoices, wait_for_reward_ticket_ids
 from .views import *  # noqa: F401,F403
 from .views_api import *  # noqa: F401,F403
 
@@ -33,3 +33,4 @@ from .views_api import *  # noqa: F401,F403
 def bookie_start():
     loop = asyncio.get_event_loop()
     loop.create_task(catch_everything_and_restart(wait_for_paid_invoices))
+    loop.create_task(catch_everything_and_restart(wait_for_reward_ticket_ids))

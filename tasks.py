@@ -1,11 +1,17 @@
 import asyncio
+import json
 
 from lnbits.core.models import Payment
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
 from .views_api import api_ticket_send_ticket
+from .crud import get_ticket, cas_ticket_state, get_competition, update_ticket
+from .helpers import pay_lnurlp
 
+PRIZE_FEE_PERCENT = 1
+
+reward_ticket_ids_queue = asyncio.Queue()
 
 async def wait_for_paid_invoices():
     invoice_queue = asyncio.Queue()
@@ -31,3 +37,66 @@ async def on_invoice_paid(payment: Payment) -> None:
             ticket_id,
         )
     return
+
+async def wait_for_reward_ticket_ids():
+    while True:
+        ticket_id = await reward_ticket_ids_queue.get()
+        await on_reward_ticket_id(ticket_id)
+
+async def on_reward_ticket_id(ticket_id: str) -> None:
+    ticket = await get_ticket(ticket_id)
+    if not ticket:
+        return
+    new_state = {
+        "WON_UNPAID": "WON_PAYING",
+        "WON_PAYMENT_FAILED": "WON_PAYING",
+        "CANCELLED_UNPAID": "CANCELLED_PAYING",
+        "CANCELLED_PAYMENT_FAILED": "CANCELLED_PAYING"
+    }.get(ticket.state)
+    if not new_state:
+        return
+    cas_success = await cas_ticket_state(ticket_id, ticket.state, new_state)
+    if not cas_success:
+        return
+    final_reward_msat = 0
+    try:
+        # get ticket again
+        ticket = await get_ticket(ticket_id)
+        if not ticket:
+            return
+        if ticket.state == "CANCLLED_PAYING":
+            reward_msat = ticket.amount * 1000
+            description_prefix = "BookieCancelled"
+        else: # WON_PAYING
+            competition = await get_competition(ticket.competition)
+            choices = json.loads(competition.choices)
+            total_msat = sum(choice["total"] for choice in choices) * 1000
+            reward_msat = total_msat * ticket.amount * (100 - PRIZE_FEE_PERCENT) // (choices[ticket.choice]["total"] * 100)
+            description_prefix = "BookieReward"
+        payment_hash, final_reward_msat = await pay_lnurlp(
+            ticket.wallet,
+            ticket.reward_target,
+            reward_msat,
+            f"{description_prefix}:{ticket.competition}.{ticket.id}",
+            {"tag":"bookie"}
+        )
+    except Exception as exception:
+        await update_ticket(
+            ticket_id,
+            state={
+                "CANCELLED_PAYING": "CANCELLED_PAYMENT_FAILED",
+                "WON_PAYING": "WON_PAYMENT_FAILED"
+            }[ticket.state],
+            reward_failure=str(exception)
+        )
+        return
+    await update_ticket(
+      ticket.id,
+      state={
+          "CANCELLED_PAYING": "CANCELLED_PAID",
+          "WON_PAYING": "WON_PAID"
+      }[ticket.state],
+      reward_failure="",
+      reward_msat=final_reward_msat,
+      reward_payment_hash=payment_hash
+    )

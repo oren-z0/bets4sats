@@ -44,6 +44,26 @@ async def create_ticket(
     assert ticket, "Newly created ticket couldn't be retrieved"
     return ticket
 
+async def cas_ticket_state(ticket_id: str, old_state: str, new_state: str) -> bool:
+    update_result = await db.execute(
+        """
+        UPDATE bookie.tickets
+        SET state = ?
+        WHERE id = ? AND state = ?
+        """,
+        (old_state, ticket_id, new_state)
+    )
+    return update_result.rowcount > 0
+
+async def update_ticket(ticket_id: str, **kwargs) -> Ticket:
+    q = ", ".join([f"{field[0]} = ?" for field in kwargs.items()])
+    await db.execute(
+        f"UPDATE bookie.tickets SET {q} WHERE id = ?", (*kwargs.values(), ticket_id)
+    )
+    ticket = await get_ticket(ticket_id)
+    assert ticket, "Newly updated ticket couldn't be retrieved"
+    return ticket
+
 
 async def get_ticket(ticket_id: str) -> Optional[Ticket]:
     row = await db.fetchone("SELECT * FROM bookie.tickets WHERE id = ?", (ticket_id,))

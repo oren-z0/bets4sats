@@ -59,12 +59,14 @@ async def get_lnurlp_parameters(code: str) -> LnurlpParameters:
         commentAllowed=commentAllowed if isinstance(commentAllowed, int) else 0,
     )
 
-async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: str, extra: Optional[Dict]):
+async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: str, extra: Optional[Dict]) -> tuple[str, int]:
     # Deduct lightning fees
     # This may actually deduct too much, because the final fee will be
     # fee_reserve(final_amount_msat) <= fee_reserve(amount_msat), but the exact calculation
     # might get complicated if fee_reserve changes.
     final_amount_msat = amount_msat - fee_reserve(amount_msat)
+    if final_amount_msat <= 0:
+        raise Exception("Payment is negative or zero after deducting lightning fees")
     params = await get_lnurlp_parameters(code)
     if final_amount_msat < params.minSendable:
         raise Exception("Payment is too small for receiver")
@@ -105,6 +107,6 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
         extra=extra,
         max_sat=(amount_msat // 1000) + 1, # safety
     )
-    return payment_hash
+    return payment_hash, final_amount_msat
 
 
