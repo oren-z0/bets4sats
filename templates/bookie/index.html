@@ -209,14 +209,50 @@
           label="Info about the competition "
         ></q-input>
         <div class="row">
+          <div class="col-12">Choices</div>
+        </div>
+        <div class="row" v-for="(choice, index) in formDialog.data.choices">
+          <div class="col-11">
+            <q-input
+              filled
+              dense
+              v-model.trim="choice['title']"
+              type="text"
+            ></q-input>
+          </div>
+          <div class="col-1">
+            <q-btn
+              flat
+              dense
+              size="sm"
+              @click="deleteChoice(index)"
+              icon="cancel"
+              color="pink"
+            ></q-btn>
+          </div>
+        </div>
+        <div class="row q-mt-sm">
+          <q-btn
+            unelevated
+            color="secondary"
+            type="button"
+            @click="addChoice"
+            size="sm"
+          >
+            Add Choice
+          </q-btn>
+        </div>
+        <div class="row">
           <div class="col-4">Ticket closing date (UTC)</div>
-          <div class="col-8">
+          <div class="col-4">
             <q-input
               filled
               dense
               v-model.trim="formDialog.data.closing_date"
               type="date"
             ></q-input>
+          </div>
+          <div class="col-4">
             <q-input
               filled
               dense
@@ -239,7 +275,7 @@
         </div>
 
         <div class="row">
-          <div class="col q-pl-sm">
+          <div class="col-6">
             <q-input
               filled
               dense
@@ -248,7 +284,7 @@
               label="Min bet in sats "
             ></q-input>
           </div>
-          <div class="col q-pl-sm">
+          <div class="col-6">
             <q-input
               filled
               dense
@@ -293,6 +329,12 @@
     obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
     obj.displayUrl = ['/bookie/', obj.id].join('')
     return obj
+  }
+
+  function defaultFormDialogData() {
+    return {
+      choices: [{ title: "Team A" }, { title: "Team B" }]
+    }
   }
 
   new Vue({
@@ -364,7 +406,7 @@
         },
         formDialog: {
           show: false,
-          data: {}
+          data: defaultFormDialogData(),
         }
       }
     },
@@ -429,11 +471,11 @@
         var wallet = _.findWhere(this.g.user.wallets, {
           id: this.formDialog.data.wallet
         })
-        const { closing_date, closing_time, ...other } = this.formDialog.data
+        const { closing_date, closing_time, choices, ...other } = this.formDialog.data
         const data = {
           ...other,
           closing_datetime: `${closing_date}T${closing_time}:00.000Z`,
-          choices: JSON.stringify([{ "title": "Team A" }, { "title": "Team B" }]),
+          choices: JSON.stringify(choices),
         }
 
         if (data.id) {
@@ -450,7 +492,7 @@
           .then(function (response) {
             self.competitions.push(mapCompetitions(response.data))
             self.formDialog.show = false
-            self.formDialog.data = {}
+            self.formDialog.data = defaultFormDialogData()
           })
           .catch(function (error) {
             LNbits.utils.notifyApiError(error)
@@ -458,11 +500,12 @@
       },
       updateformDialog: function (formId) {
         var link = _.findWhere(this.competitions, {id: formId})
-        const { closing_datetime, ...data } = link;
+        const { closing_datetime, choices, ...data } = link;
         this.formDialog.data = {
           ...data,
           closing_date: closing_datetime.split('T')[0],
           closing_time: closing_datetime.split('T')[1].slice(0, 5),
+          choices: JSON.parse(choices),
         }
         this.formDialog.show = true
       },
@@ -483,7 +526,7 @@
             })
             self.competitions.push(mapCompetitions(response.data))
             self.formDialog.show = false
-            self.formDialog.data = {}
+            self.formDialog.data = defaultFormDialogData()
           })
           .catch(function (error) {
             LNbits.utils.notifyApiError(error)
@@ -514,7 +557,20 @@
       },
       exportcompetitionsCSV: function () {
         LNbits.utils.exportCSV(this.competitionsTable.columns, this.competitions)
-      }
+      },
+      addChoice: function() {
+        this.formDialog.data.choices = [
+          ...this.formDialog.data.choices,
+          { title: '' },
+        ]
+      },
+      deleteChoice: function(index) {
+        const choices = [
+          ...this.formDialog.data.choices
+        ]
+        choices.splice(index, 1)
+        this.formDialog.data.choices = choices
+      },
     },
 
     created: function () {
