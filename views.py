@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from http import HTTPStatus
 
@@ -70,6 +71,8 @@ async def ticket(request: Request, ticket_id):
             "ticket_amount": ticket.amount,
             "competition_name": competition.name,
             "competition_id": competition.id,
+            "ticket_choice": json.loads(competition.choices)[ticket.choice]["title"],
+            "ticket_state": ticket.state,
         },
     )
 
