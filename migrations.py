@@ -33,6 +33,7 @@ async def m002_changed(db):
             reward_target TEXT NOT NULL,
             choice INTEGER NOT NULL,
             state TEXT NOT NULL,
+            reward_msat INTEGER NOT NULL,
             reward_failure TEXT NOT NULL,
             reward_payment_hash TEXT NOT NULL,
             time TIMESTAMP NOT NULL DEFAULT """

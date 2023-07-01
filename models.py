@@ -42,6 +42,7 @@ class Ticket(BaseModel):
     reward_target: str
     choice: int
     state: str
+    reward_msat: int
     reward_failure: str
     reward_payment_hash: str
     time: int
