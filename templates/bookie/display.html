@@ -132,8 +132,8 @@
     mixins: [windowMixin],
     data: function () {
       return {
-        isCompetitionOpen: '{{ competition_state }}' === 'INITIAL' && {{ competition_amount_tickets }} > 0 && Date.now() < new Date('{{ competition_closing_datetime }}').getTime(),
-        choices: {{ competition_choices }},
+        isCompetitionOpen: '{{ competition_state }}' === 'INITIAL' && {{ competition_amount_tickets | safe }} > 0 && Date.now() < new Date('{{ competition_closing_datetime }}').getTime(),
+        choices: {{ competition_choices | safe }},
         paymentReq: null,
         redirectUrl: null,
         formDialog: {
