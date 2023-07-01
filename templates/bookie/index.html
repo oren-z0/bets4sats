@@ -500,7 +500,7 @@
       },
       updateformDialog: function (formId) {
         var link = _.findWhere(this.competitions, {id: formId})
-        const { closing_datetime, choices, ...data } = link;
+        const { closing_datetime, choices, ...data } = link
         this.formDialog.data = {
           ...data,
           closing_date: closing_datetime.split('T')[0],
@@ -548,6 +548,9 @@
               .then(function (response) {
                 self.competitions = _.reject(self.competitions, function (obj) {
                   return obj.id == competitionsId
+                })
+                self.tickets = _.reject(self.tickets, function (obj) {
+                  return obj.competition == competitionId
                 })
               })
               .catch(function (error) {
