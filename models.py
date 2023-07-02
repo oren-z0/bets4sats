@@ -30,6 +30,8 @@ class Competition(BaseModel):
     sold: int
     choices: str
     winning_choice: int
+    # states: INITIAL, COMPLETED_PAYING, COMPLETED_PAID, COMPLETED_PAID_ALL, CANCELLED_PAYING,
+    # CANCELLED_PAID, CANCELLED_PAID_ALL
     state: str
     time: int
 
@@ -41,6 +43,8 @@ class Ticket(BaseModel):
     amount: int
     reward_target: str
     choice: int
+    # states: INITIAL, WON_UNPAID, WON_PAYING, WON_PAYMENT_FAILED, WON_PAID,
+    # CANCELLED_UNPAID, CANCELLED_PAYING, CANCELLED_PAYMENT_FAILED, CANCELLED_PAID
     state: str
     reward_msat: int
     reward_failure: str
