@@ -6,7 +6,7 @@ from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
 from .views_api import api_ticket_send_ticket
-from .crud import get_ticket, cas_ticket_state, get_competition, update_competition, update_ticket, is_competition_payment_complete
+from .crud import cas_competition_state, get_ticket, cas_ticket_state, get_competition, update_ticket, is_competition_payment_complete
 from .helpers import pay_lnurlp
 
 PRIZE_FEE_PERCENT = 1
@@ -104,8 +104,9 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
     if competition_complete:
         competition = await get_competition(ticket.competition)
         if competition.state in ("COMPLETED_PAYING", "CANCELLED_PAYING"):
-            await update_competition(
+            await cas_competition_state(
                 ticket.competition,
+                competition.state,
                 state={
                     "COMPLETED_PAYING": "COMPLETED_PAID",
                     "CANCELLED_PAYING": "CANCELLED_PAID",

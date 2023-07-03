@@ -25,8 +25,9 @@ from .crud import (
     get_competitions,
     get_ticket,
     get_tickets,
+    update_competition,
 )
-from .models import CreateCompetition, CreateInvoiceForTicket
+from .models import CreateCompetition, CreateInvoiceForTicket, UpdateCompetition
 
 # Competitions
 
@@ -61,6 +62,30 @@ async def api_competition_create(data: CreateCompetition):
     competition = await create_competition(data=data)
 
     return competition.dict()
+
+@bookie_ext.patch("/api/v1/competitions/{competition_id}")
+async def api_competition_update(data: UpdateCompetition, competition_id: str, wallet: WalletTypeInfo = Depends(get_key_type)):
+    if data.amount_tickets is not None and data.amount_tickets < 0:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="amount_tickets cannot be negative")
+    if data.closing_datetime is not None:
+      try:
+          datetime.strptime(data.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
+      except:
+          raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Invalid closing_datetime")        
+    competition = await get_competition(competition_id)
+    if not competition:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Not your competition")
+    if competition.wallet != wallet.wallet.id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your competition"
+        )
+
+    competition = await update_competition(competition_id, data)
+    if competition is None:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Cannot update competition when no longer in INITIAL state"
+        )
+    return competition.dict()    
 
 @bookie_ext.delete("/api/v1/competitions/{competition_id}")
 async def api_form_delete(competition_id, wallet: WalletTypeInfo = Depends(get_key_type)):

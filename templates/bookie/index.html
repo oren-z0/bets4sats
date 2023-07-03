@@ -186,6 +186,7 @@
               v-model.trim="formDialog.data.name"
               type="name"
               label="Title of competition "
+              :disable="formDialog.data.id != null"
             ></q-input>
           </div>
           <div class="col q-pl-sm">
@@ -196,6 +197,7 @@
               v-model="formDialog.data.wallet"
               :options="g.user.walletOptions"
               label="Wallet *"
+              :disable="formDialog.data.id != null"
             >
             </q-select>
           </div>
@@ -207,6 +209,7 @@
           v-model.trim="formDialog.data.info"
           type="textarea"
           label="Info about the competition "
+          :disable="formDialog.data.id != null"
         ></q-input>
         <div class="row">
           <div class="col-12">Choices:</div>
@@ -218,6 +221,7 @@
               dense
               v-model.trim="choice['title']"
               type="text"
+              :disable="formDialog.data.id != null"
             ></q-input>
           </div>
           <div class="col-1">
@@ -228,6 +232,7 @@
               @click="deleteChoice(index)"
               icon="cancel"
               color="pink"
+              v-if="!formDialog.data.id"
             ></q-btn>
           </div>
         </div>
@@ -238,6 +243,7 @@
             type="button"
             @click="addChoice"
             size="sm"
+            v-if="!formDialog.data.id"
           >
             Add New Choice
           </q-btn>
@@ -282,6 +288,7 @@
               v-model.number="formDialog.data.min_bet"
               type="number"
               label="Min bet in sats "
+              :disable="formDialog.data.id != null"
             ></q-input>
           </div>
           <div class="col-6">
@@ -291,6 +298,7 @@
               v-model.number="formDialog.data.max_bet"
               type="number"
               label="Max bet in sats "
+              :disable="formDialog.data.id != null"
             ></q-input>
           </div>
         </div>
@@ -481,7 +489,11 @@
         }
 
         if (data.id) {
-          this.updateCompetition(wallet, data)
+          // Only patch things that are allowed to change
+          this.updateCompetition(wallet, {
+            amount_tickets: data.amount_tickets,
+            closing_datetime: data.closing_datetime,
+          })
         } else {
           this.createCompetition(wallet, data)
         }
@@ -517,7 +529,7 @@
 
         LNbits.api
           .request(
-            'PUT',
+            'PATCH',
             '/bookie/api/v1/competitions/' + data.id,
             wallet.inkey,
             data

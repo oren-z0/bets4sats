@@ -4,7 +4,7 @@ import json
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
-from .models import CreateCompetition, Competition, Ticket
+from .models import CreateCompetition, Competition, Ticket, UpdateCompetition
 
 # TICKETS
 
@@ -51,7 +51,7 @@ async def cas_ticket_state(ticket_id: str, old_state: str, new_state: str) -> bo
         SET state = ?
         WHERE id = ? AND state = ?
         """,
-        (old_state, ticket_id, new_state)
+        (new_state, ticket_id, old_state)
     )
     return update_result.rowcount > 0
 
@@ -120,15 +120,34 @@ async def create_competition(data: CreateCompetition) -> Competition:
     return competition
 
 
-async def update_competition(competition_id: str, **kwargs) -> Competition:
-    q = ", ".join([f"{field[0]} = ?" for field in kwargs.items()])
-    await db.execute(
-        f"UPDATE bookie.competitions SET {q} WHERE id = ?", (*kwargs.values(), competition_id)
+async def update_competition(competition_id: str, data: UpdateCompetition) -> Optional[Competition]:
+    query, values = zip(
+        *([["amount_tickets = ?", data.amount_tickets]] if data.amount_tickets is not None else []),
+        *([["closing_datetime = ?", data.closing_datetime]] if data.closing_datetime is not None else []),
     )
-    competition = await get_competition(competition_id)
-    assert competition, "Newly updated competition couldn't be retrieved"
-    return competition
+    if not query:
+        return await get_competition(competition_id)
+    
+    update_result = await db.execute(
+        f"UPDATE bookie.competitions SET {', '.join(query)} WHERE id = ? AND state = ?",
+        (*values, competition_id, "INITIAL"),
+    )
+    if update_result.rowcount == 0:
+        return None
+    
+    return await get_competition(competition_id)
 
+async def cas_competition_state(competition_id: str, old_state: str, new_state: str) -> bool:
+    update_result = await db.execute(
+        """
+        UPDATE bookie.competitions
+        SET state = ?
+        WHERE id = ? AND state = ?
+        """,
+        (new_state, competition_id, old_state)
+    )
+    return update_result.rowcount > 0
+    
 
 async def get_competition(competition_id: str) -> Optional[Competition]:
     row = await db.fetchone("SELECT * FROM bookie.competitions WHERE id = ?", (competition_id,))

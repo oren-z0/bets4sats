@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi.param_functions import Query
 from pydantic import BaseModel
 
@@ -12,6 +13,10 @@ class CreateCompetition(BaseModel):
     min_bet: int = Query(..., gt=0, lt=MAX_SATS)
     max_bet: int = Query(..., gt=0, lt=MAX_SATS)
     choices: str
+
+class UpdateCompetition(BaseModel):
+    closing_datetime: Optional[str]
+    amount_tickets: Optional[int] # not sure how Query will behave in case of None
 
 class CreateInvoiceForTicket(BaseModel):
     reward_target: str
@@ -30,7 +35,7 @@ class Competition(BaseModel):
     sold: int
     choices: str
     winning_choice: int
-    # states: INITIAL, COMPLETED_PAYING, COMPLETED_PAID, COMPLETED_PAID_ALL, CANCELLED_PAYING,
+    # states: INITIAL, CLOSED, COMPLETED_PAYING, COMPLETED_PAID, COMPLETED_PAID_ALL, CANCELLED_PAYING,
     # CANCELLED_PAID, CANCELLED_PAID_ALL
     state: str
     time: int
