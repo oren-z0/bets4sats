@@ -25,7 +25,6 @@ from .crud import (
     get_competitions,
     get_ticket,
     get_tickets,
-    update_competition,
 )
 from .models import CreateCompetition, CreateInvoiceForTicket
 
@@ -46,10 +45,7 @@ async def api_competitions(
 
 
 @bookie_ext.post("/api/v1/competitions")
-@bookie_ext.put("/api/v1/competitions/{competition_id}")
-async def api_competition_create(
-    data: CreateCompetition, competition_id=None, wallet: WalletTypeInfo = Depends(get_key_type)
-):
+async def api_competition_create(data: CreateCompetition):
     choices = json.loads(data.choices)
     if not isinstance(choices, list):
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Choices must be a list")
@@ -57,24 +53,14 @@ async def api_competition_create(
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Choices title must be a non-empty string")
     if len(choices) < 2:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Must have at least 2 choices")
+    try:
+        datetime.strptime(data.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
+    except:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Invalid closing_datetime")
 
-    if competition_id:
-        competition = await get_competition(competition_id)
-        if not competition:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
-            )
-
-        if competition.wallet != wallet.wallet.id:
-            raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN, detail="Not your competition."
-            )
-        competition = await update_competition(competition_id, **data.dict())
-    else:
-        competition = await create_competition(data=data)
+    competition = await create_competition(data=data)
 
     return competition.dict()
-
 
 @bookie_ext.delete("/api/v1/competitions/{competition_id}")
 async def api_form_delete(competition_id, wallet: WalletTypeInfo = Depends(get_key_type)):
