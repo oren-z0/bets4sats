@@ -35,8 +35,7 @@ class Competition(BaseModel):
     sold: int
     choices: str
     winning_choice: int
-    # states: INITIAL, CLOSED, COMPLETED_PAYING, COMPLETED_PAID, COMPLETED_PAID_ALL, CANCELLED_PAYING,
-    # CANCELLED_PAID, CANCELLED_PAID_ALL
+    # states: INITIAL, COMPLETED_PAYING, COMPLETED_PAID, COMPLETED_PAID_ALL
     state: str
     time: int
 

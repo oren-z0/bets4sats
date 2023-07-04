@@ -66,7 +66,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             return
         if ticket.state == "CANCELLED_PAYING":
             reward_msat = ticket.amount * 1000
-            description_prefix = "BookieCancelled"
+            description_prefix = "BookieRefund"
         else: # WON_PAYING
             competition = await get_competition(ticket.competition)
             choices = json.loads(competition.choices)
@@ -102,13 +102,8 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
         )
     competition_complete = await is_competition_payment_complete(ticket.competition)
     if competition_complete:
-        competition = await get_competition(ticket.competition)
-        if competition.state in ("COMPLETED_PAYING", "CANCELLED_PAYING"):
-            await cas_competition_state(
-                ticket.competition,
-                competition.state,
-                state={
-                    "COMPLETED_PAYING": "COMPLETED_PAID",
-                    "CANCELLED_PAYING": "CANCELLED_PAID",
-                }[competition.state]
-            )
+        await cas_competition_state(
+            ticket.competition,
+            old_state="COMPLETED_PAYING",
+            state="COMPLETED_PAID"
+        )
