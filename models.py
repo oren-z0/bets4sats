@@ -18,6 +18,9 @@ class UpdateCompetition(BaseModel):
     closing_datetime: Optional[str]
     amount_tickets: Optional[int] # not sure how Query will behave in case of None
 
+class CompleteCompetition(BaseModel):
+    winning_choice: int # -1 for cancellation
+
 class CreateInvoiceForTicket(BaseModel):
     reward_target: str
     amount: int
@@ -47,13 +50,17 @@ class Ticket(BaseModel):
     amount: int
     reward_target: str
     choice: int
-    # states: INITIAL, WON_UNPAID, WON_PAYING, WON_PAYMENT_FAILED, WON_PAID,
+    # states: INITIAL, LOST, WON_UNPAID, WON_PAYING, WON_PAYMENT_FAILED, WON_PAID,
     # CANCELLED_UNPAID, CANCELLED_PAYING, CANCELLED_PAYMENT_FAILED, CANCELLED_PAID
     state: str
     reward_msat: int
     reward_failure: str
     reward_payment_hash: str
     time: int
+
+class ChoiceAmountSum(BaseModel):
+    choice: int
+    amount_sum: int
 
 class LnurlpParameters(BaseModel):
     minSendable: int

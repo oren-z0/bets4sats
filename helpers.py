@@ -1,10 +1,18 @@
 from typing import Dict, Optional
+from datetime import datetime
+from http import HTTPStatus
 from urllib.parse import urlparse, quote
 import json
 
 from lnbits import lnurl, bolt11
 from lnbits.core.services import fee_reserve, pay_invoice
+from lnbits.core.crud import get_payments
+from lnbits.core.models import PaymentFilters
+from lnbits.db import Filters, Filter
+from starlette.exceptions import HTTPException
 import httpx
+
+from .crud import create_ticket, get_competition, get_ticket
 from .models import LnurlpParameters
 
 # Similar to /api/v1/lnurlscan/{code}
@@ -109,4 +117,54 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
     )
     return payment_hash, final_amount_msat
 
+# Used both in api and in tasks:
+async def send_ticket(competition_id, ticket_id):
+    competition = await get_competition(competition_id)
+    if not competition:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Competition could not be fetched.",
+        )
 
+    all_payments = await get_payments(
+        wallet_id=competition.wallet,
+        incoming=True,
+        limit=1,
+        filters=Filters(
+            filters=[Filter(
+              field="memo",
+              values=[f"BookieTicketId:{competition_id}.{ticket_id}"],
+              model=PaymentFilters
+            )],
+            model=PaymentFilters,
+        )
+    )
+    if not all_payments:
+        raise HTTPException(
+              status_code=HTTPStatus.NOT_FOUND,
+              detail="Payment of given ticket-id could not be fetched.",
+          )
+    payment, = all_payments
+    if payment.pending:
+        await payment.check_status()
+    if payment.pending:
+        return {"paid": False}
+    exists = await get_ticket(ticket_id)
+    if exists:
+        return {"paid": True}
+    # Danger: Not safe against parallel requests
+    if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Competition is close for new tickets. If you think you should get a refund, please contact the admin."
+        )
+
+    await create_ticket(
+        ticket_id=ticket_id,
+        wallet=competition.wallet,
+        competition=competition_id,
+        amount=payment.sat,
+        reward_target=str(payment.extra.get("reward_target")),
+        choice=int(payment.extra.get("choice"))
+    )
+    return {"paid": True}

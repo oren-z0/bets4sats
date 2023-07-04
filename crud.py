@@ -4,7 +4,7 @@ import json
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
-from .models import CreateCompetition, Competition, Ticket, UpdateCompetition
+from .models import ChoiceAmountSum, CreateCompetition, Competition, Ticket, UpdateCompetition
 
 # TICKETS
 
@@ -25,6 +25,8 @@ async def create_ticket(
     while True:
       competitiondata = await get_competition(competition)
       assert competitiondata, "Couldn't get competition from ticket being paid"
+      if competitiondata.state != "INITIAL":
+          break
       sold = competitiondata.sold + 1
       amount_tickets = competitiondata.amount_tickets - 1
       choices = json.loads(competitiondata.choices)
@@ -33,9 +35,9 @@ async def create_ticket(
           """
           UPDATE bookie.competitions
           SET sold = ?, amount_tickets = ?, choices = ?
-          WHERE id = ? AND amount_tickets = ?
+          WHERE id = ? AND amount_tickets = ? AND state = ?
           """,
-          (sold, amount_tickets, json.dumps(choices), competition, competitiondata.amount_tickets),
+          (sold, amount_tickets, json.dumps(choices), competition, competitiondata.amount_tickets, "INITIAL"),
       )
       if update_result.rowcount > 0:
           break
@@ -147,7 +149,65 @@ async def cas_competition_state(competition_id: str, old_state: str, new_state: 
         (new_state, competition_id, old_state)
     )
     return update_result.rowcount > 0
-    
+
+async def set_winning_choice(competition_id: str, winning_choice: int) -> None:
+    await db.execute(
+        """
+        UPDATE bookie.competitions
+        SET winning_choice = ?
+        WHERE id = ?
+        """,
+        (winning_choice, competition_id)
+    )
+
+async def sum_choices_amounts(competition_id: str) -> List[ChoiceAmountSum]:
+    choices = await db.execute(
+        """
+        SELECT choice, SUM(amount) amount_sum
+        FROM bookie.tickets
+        WHERE competition = ?
+        GROUP BY choice
+        """,
+        (competition_id,),        
+    )
+    return [ChoiceAmountSum(**choice) for choice in choices]
+
+async def update_competition_winners(competition_id: str, choices: str, winning_choice: int):
+    await db.execute(
+        """
+        UPDATE bookie.competitions
+        SET choices = ? AND winning_choice = ?
+        WHERE id = ?
+        """,
+        (choices, winning_choice, competition_id)
+    )
+    if winning_choice < 0:
+        await db.execute(
+            """
+            UPDATE bookie.tickets
+            SET state = ?
+            WHERE competition = ? AND state = ?
+            """,
+            ("CANCELLED_UNPAID", competition_id, "INITIAL")
+        )
+    else:
+        await db.execute(
+            """
+            UPDATE bookie.tickets
+            SET state = ?
+            WHERE competition = ? AND state = ? AND choice = ?
+            """,
+            ("WON_UNPAID", competition_id, "INITIAL", winning_choice)
+        )
+        await db.execute(
+            """
+            UPDATE bookie.tickets
+            SET state = ?
+            WHERE competition = ? AND state = ? AND choice != ?
+            """,
+            ("LOST", competition_id, "INITIAL", winning_choice)
+        )
+
 
 async def get_competition(competition_id: str) -> Optional[Competition]:
     row = await db.fetchone("SELECT * FROM bookie.competitions WHERE id = ?", (competition_id,))
@@ -177,6 +237,13 @@ async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) ->
     rows = await db.fetchall(
         "SELECT * FROM bookie.tickets WHERE wallet = ? AND competition = ?",
         (wallet_id, competition_id),
+    )
+    return [Ticket(**row) for row in rows]
+
+async def get_state_competition_tickets(competition_id: str, state: str) -> List[Ticket]:
+    rows = await db.fetchall(
+        "SELECT * FROM bookie.tickets WHERE state = ? AND competition = ?",
+        (state, competition_id),
     )
     return [Ticket(**row) for row in rows]
 

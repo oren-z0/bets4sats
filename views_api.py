@@ -6,28 +6,30 @@ from fastapi import Depends, Query
 import shortuuid
 from starlette.exceptions import HTTPException
 
-from lnbits.core.crud import get_user, get_standalone_payment, get_payments
-from lnbits.core.models import PaymentFilters
+from lnbits.core.crud import get_user
 from lnbits.core.services import create_invoice
-from lnbits.core.views.api import api_payment
-from lnbits.db import Filters, Filter
 from lnbits.decorators import WalletTypeInfo, get_key_type
 
 from . import bookie_ext
+from .tasks import reward_ticket_ids_queue
+from .helpers import send_ticket
 from .crud import (
+    cas_competition_state,
     create_competition,
-    create_ticket,
     delete_competition,
     delete_competition_tickets,
     delete_ticket,
     get_competition,
+    get_state_competition_tickets,
     get_wallet_competition_tickets,
     get_competitions,
     get_ticket,
     get_tickets,
+    sum_choices_amounts,
     update_competition,
+    update_competition_winners,
 )
-from .models import CreateCompetition, CreateInvoiceForTicket, UpdateCompetition
+from .models import CompleteCompetition, CreateCompetition, CreateInvoiceForTicket, UpdateCompetition
 
 # Competitions
 
@@ -66,7 +68,7 @@ async def api_competition_create(data: CreateCompetition):
 @bookie_ext.patch("/api/v1/competitions/{competition_id}")
 async def api_competition_update(data: UpdateCompetition, competition_id: str, wallet: WalletTypeInfo = Depends(get_key_type)):
     if data.amount_tickets is not None and data.amount_tickets < 0:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="amount_tickets cannot be negative")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="amount_tickets cannot be negative")
     if data.closing_datetime is not None:
       try:
           datetime.strptime(data.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -74,7 +76,7 @@ async def api_competition_update(data: UpdateCompetition, competition_id: str, w
           raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Invalid closing_datetime")        
     competition = await get_competition(competition_id)
     if not competition:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Not your competition")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Competition not found")
     if competition.wallet != wallet.wallet.id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Not your competition"
@@ -85,7 +87,40 @@ async def api_competition_update(data: UpdateCompetition, competition_id: str, w
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Cannot update competition when no longer in INITIAL state"
         )
-    return competition.dict()    
+    return competition.dict()
+
+@bookie_ext.post("/api/v1/competitions/{competition_id}/complete")
+async def api_competition_complete(data: CompleteCompetition, competition_id: str, wallet: WalletTypeInfo = Depends(get_key_type)):
+    if data.winning_choice < -1:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="winning_choice cannot be below -1")
+    
+    competition = await get_competition(competition_id)
+    if not competition:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="competition not found")
+    if competition.wallet != wallet.wallet.id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your competition"
+        )
+    cas_result = await cas_competition_state(competition_id, "INITIAL", "COMPLETED_PAYING")
+    if not cas_result:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="competition already completed")
+    # refetch competition after cas
+    competition = await get_competition(competition_id)
+    choices = json.loads(competition.choices)
+    if data.winning_choice >= len(choices):
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="winning_choice too high")
+    if choices[data.winning_choice]["total"] == 0:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="no bet on winning choice")
+    for choice in choices:
+        choice["pre_agg_total"] = choice["total"]
+        choice["total"] = 0
+    choice_amount_sums = await sum_choices_amounts(competition.id)
+    for choice_amount_sum in choice_amount_sums:
+        choices[choice_amount_sum.choice]["total"] = choice_amount_sum.amount_sum
+    await update_competition_winners(competition_id, json.dumps(choices), data.winning_choice)
+    unpaid_winning_tickets = await get_state_competition_tickets(competition_id, "WON_UNPAID")
+    for ticket in unpaid_winning_tickets:
+        reward_ticket_ids_queue.put(ticket.id)
 
 @bookie_ext.delete("/api/v1/competitions/{competition_id}")
 async def api_form_delete(competition_id, wallet: WalletTypeInfo = Depends(get_key_type)):
@@ -155,55 +190,8 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
 
 @bookie_ext.get("/api/v1/tickets/{competition_id}/{ticket_id}")
 async def api_ticket_send_ticket(competition_id, ticket_id):
-    competition = await get_competition(competition_id)
-    if not competition:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Competition could not be fetched.",
-        )
-
-    all_payments = await get_payments(
-        wallet_id=competition.wallet,
-        incoming=True,
-        limit=1,
-        filters=Filters(
-            filters=[Filter(
-              field="memo",
-              values=[f"BookieTicketId:{competition_id}.{ticket_id}"],
-              model=PaymentFilters
-            )],
-            model=PaymentFilters,
-        )
-    )
-    if not all_payments:
-        raise HTTPException(
-              status_code=HTTPStatus.NOT_FOUND,
-              detail="Payment of given ticket-id could not be fetched.",
-          )
-    payment, = all_payments
-    if payment.pending:
-        await payment.check_status()
-    if payment.pending:
-        return {"paid": False}
-    exists = await get_ticket(ticket_id)
-    if exists:
-        return {"paid": True}
-    if competition.state != "INITIAL" or competition.amount_tickets <= 0 or datetime.utcnow() > datetime.strptime(competition.closing_datetime, "%Y-%m-%dT%H:%M:%S.%fZ"):
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail="Competition is close for new tickets. If you think you should get a refund, please contact the admin."
-        )
-
-    await create_ticket(
-        ticket_id=ticket_id,
-        wallet=competition.wallet,
-        competition=competition_id,
-        amount=payment.sat,
-        reward_target=str(payment.extra.get("reward_target")),
-        choice=int(payment.extra.get("choice"))
-    )
-    return {"paid": True}
-
+    response = await send_ticket(competition_id, ticket_id)
+    return response
 
 @bookie_ext.delete("/api/v1/tickets/{ticket_id}")
 async def api_ticket_delete(ticket_id, wallet: WalletTypeInfo = Depends(get_key_type)):

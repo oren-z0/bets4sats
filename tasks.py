@@ -5,9 +5,8 @@ from lnbits.core.models import Payment
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
-from .views_api import api_ticket_send_ticket
 from .crud import cas_competition_state, get_ticket, cas_ticket_state, get_competition, update_ticket, is_competition_payment_complete
-from .helpers import pay_lnurlp
+from .helpers import pay_lnurlp, send_ticket
 
 PRIZE_FEE_PERCENT = 1
 
@@ -32,7 +31,7 @@ async def on_invoice_paid(payment: Payment) -> None:
         and payment.memo and payment.memo.startswith("BookieTicketId:")
     ):
         competition_id, ticket_id = payment.memo[len("BookieTicketId:"):].split(".") + [""]
-        await api_ticket_send_ticket(
+        await send_ticket(
             competition_id,
             ticket_id,
         )
