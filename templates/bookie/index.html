@@ -598,9 +598,9 @@
             LNbits.utils.notifyApiError(error)
           })
       },
-      deleteCompetition: function (competitionsId) {
+      deleteCompetition: function (competitionId) {
         var self = this
-        var competitions = _.findWhere(this.competitions, {id: competitionsId})
+        var competitions = _.findWhere(this.competitions, {id: competitionId})
 
         LNbits.utils
           .confirmDialog('Are you sure you want to delete this competition? First make sure all the winning players have received their prize.')
@@ -608,12 +608,12 @@
             LNbits.api
               .request(
                 'DELETE',
-                '/bookie/api/v1/competitions/' + competitionsId,
+                '/bookie/api/v1/competitions/' + competitionId,
                 _.findWhere(self.g.user.wallets, {id: competitions.wallet}).inkey
               )
               .then(function (response) {
                 self.competitions = _.reject(self.competitions, function (obj) {
-                  return obj.id == competitionsId
+                  return obj.id == competitionId
                 })
                 self.tickets = _.reject(self.tickets, function (obj) {
                   return obj.competition == competitionId
