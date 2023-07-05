@@ -618,6 +618,9 @@
         ]
       },
       completeCompetition: function() {
+        wallet = _.findWhere(this.g.user.wallets, {
+          id: this.formDialog.data.wallet
+        })
         self = this
         LNbits.api
           .request(
