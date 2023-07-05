@@ -333,7 +333,7 @@
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.amount_tickets < 0 || !Number.isSafeInteger(formDialog.data.amount_tickets) || formDialog.data.min_bet == null || formDialog.data.max_bet == null || formDialog.data.min_bet < 10 || !Number.isSafeInteger(formDialog.data.min_bet) || formDialog.data.max_bet < formDialog.data.min_bet || 21_000_000_00_000_000 <= formDialog.data.max_bet || !Number.isSafeInteger(formDialog.data.max_bet)"
+            :disable="!formDialog.data.wallet || !formDialog.data.name || !formDialog.data.info || !formDialog.data.closing_date || !formDialog.data.closing_time || !Number.isSafeInteger(formDialog.data.amount_tickets) || formDialog.data.amount_tickets < 0 || !Number.isSafeInteger(formDialog.data.min_bet) || !Number.isSafeInteger(formDialog.data.max_bet) || formDialog.data.min_bet < 10 || formDialog.data.max_bet < formDialog.data.min_bet || 21_000_000_00_000_000 <= formDialog.data.max_bet"
             type="submit"
             >Create Competition</q-btn
           >
@@ -382,6 +382,9 @@
 
   function defaultFormDialogData() {
     return {
+      banner: "",
+      name: "",
+      info: "",
       choices: [{ title: "Team A" }, { title: "Team B" }],
       min_bet: 10,
     }
@@ -520,7 +523,7 @@
           })
       },
       sendCompetitionData: function () {
-        var wallet = _.findWhere(this.g.user.wallets, {
+        const wallet = _.findWhere(this.g.user.wallets, {
           id: this.formDialog.data.wallet
         })
         const { closing_date, closing_time, choices, ...other } = this.formDialog.data
@@ -576,19 +579,22 @@
         this.formDialog.show = true
       },
       updateCompetition: function (wallet, data) {
-        var self = this
-        console.log(data)
+        const wallet = _.findWhere(this.g.user.wallets, {
+          id: this.formDialog.data.wallet
+        })
+        const competitionId = this.formDialog.data.id
+        const self = this
 
         LNbits.api
           .request(
             'PATCH',
-            '/bookie/api/v1/competitions/' + data.id,
+            '/bookie/api/v1/competitions/' + competitionId,
             wallet.inkey,
             data
           )
           .then(function (response) {
             self.competitions = _.reject(self.competitions, function (obj) {
-              return obj.id == data.id
+              return obj.id == competitionId
             })
             self.competitions.push(mapCompetitions(response.data))
             self.formDialog.show = false
@@ -634,14 +640,15 @@
         ]
       },
       completeCompetition: function() {
-        wallet = _.findWhere(this.g.user.wallets, {
+        const wallet = _.findWhere(this.g.user.wallets, {
           id: this.formDialog.data.wallet
         })
-        self = this
+        const competitionId = this.formDialog.data.id
+        const self = this
         LNbits.api
           .request(
             'POST',
-            '/bookie/api/v1/competitions/' + self.formDialog.data.id + '/complete',
+            '/bookie/api/v1/competitions/' + competitionId + '/complete',
             wallet.inkey,
             {
               winning_choice: self.formDialog.data.winning_choice,
@@ -649,7 +656,7 @@
           )
           .then(function (response) {
             self.competitions = _.reject(self.competitions, function (obj) {
-              return obj.id == data.id
+              return obj.id == competitionId
             })
             self.competitions.push(mapCompetitions(response.data))
             self.formDialog.show = false
