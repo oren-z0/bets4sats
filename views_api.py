@@ -12,7 +12,7 @@ from lnbits.decorators import WalletTypeInfo, get_key_type
 
 from . import bookie_ext
 from .tasks import reward_ticket_ids_queue
-from .helpers import send_ticket
+from .helpers import get_lnurlp_parameters, send_ticket
 from .crud import (
     cas_competition_state,
     create_competition,
@@ -176,6 +176,13 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Invalid choice"
         )
+    if data.reward_target:
+        try:
+            await get_lnurlp_parameters(data.reward_target)
+        except:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="Bad lightning address or lnurlp"
+            )            
     ticket_id = shortuuid.random()
     payment_request = None
     try:
