@@ -45,4 +45,11 @@ in case of disputes.
 
 4. Use the built-in ticket scanner to see all competition tickets and find them
 via the QR code\
-   ![ticket scanner](https://i.imgur.com/zrm9202.jpg)
+   ![ticket scanner](https://i.imgur.com/0FXH5mc.png)
+
+5. In the main competitions table, scroll right and click the pen icon to edit a competition\
+    ![edit competition](https://i.imgur.com/CbIbNrX.png)
+
+6. Choose a winner, automatically pay all the rewards. Failed payments will be
+mentioned in the tickets table, so you could see them when the ticket owners
+contact you. ![complete competition](https://i.imgur.com/XO4Esgd.png)
