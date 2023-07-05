@@ -45,31 +45,31 @@ async def wait_for_reward_ticket_ids():
         await on_reward_ticket_id(ticket_id)
 
 async def on_reward_ticket_id(ticket_id: str) -> None:
-    logger.info("on_reward_ticket_id: called", ticket_id)
+    logger.info(f"on_reward_ticket_id: called {ticket_id}")
     ticket = await get_ticket(ticket_id)
     if not ticket:
-        logger.warning("on_reward_ticket_id: ticket not found, deleted before handled?", ticket_id)
+        logger.warning(f"on_reward_ticket_id: ticket not found, deleted before handled? {ticket_id}")
         return
-    logger.info("on_reward_ticket_id: handling ticket:", ticket)
+    logger.info(f"on_reward_ticket_id: handling ticket: {ticket}")
     new_state = {
         "WON_UNPAID": "WON_PAYING",
         "WON_PAYMENT_FAILED": "WON_PAYING",
         "CANCELLED_UNPAID": "CANCELLED_PAYING",
         "CANCELLED_PAYMENT_FAILED": "CANCELLED_PAYING"
     }.get(ticket.state)
-    logger.info("on_reward_ticket_id: new state:", ticket_id, new_state)
+    logger.info(f"on_reward_ticket_id: new state: {ticket_id} {new_state}")
     if not new_state:
         return
     cas_success = await cas_ticket_state(ticket_id, ticket.state, new_state)
     if not cas_success:
-        logger.info("on_reward_ticket_id: cas failed:", ticket_id)
+        logger.info(f"on_reward_ticket_id: cas failed: {ticket_id}")
         return
     final_reward_msat = 0
     try:
         # get ticket again
         ticket = await get_ticket(ticket_id)
         if not ticket:
-            logger.info("on_reward_ticket_id: failed to re-get ticket:", ticket_id)
+            logger.info(f"on_reward_ticket_id: failed to re-get ticket: {ticket_id}")
             return
         if ticket.state == "CANCELLED_PAYING":
             reward_msat = ticket.amount * 1000
@@ -80,7 +80,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             total_msat = sum(choice["total"] for choice in choices) * 1000
             reward_msat = total_msat * ticket.amount * (100 - PRIZE_FEE_PERCENT) // (choices[ticket.choice]["total"] * 100)
             description_prefix = "BookieReward"
-        logger.info("on_reward_ticket_id: paying lnurlp:", ticket_id)
+        logger.info(f"on_reward_ticket_id: paying lnurlp: {ticket_id}")
         payment_hash, final_reward_msat = await pay_lnurlp(
             ticket.wallet,
             ticket.reward_target,
@@ -89,7 +89,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             {"tag":"bookie"}
         )
     except Exception as exception:
-        logger.warning("on_reward_ticket_id: failed:", ticket_id, exception)
+        logger.warning(f"on_reward_ticket_id: failed: {ticket_id} {exception}")
         await update_ticket(
             ticket_id,
             state={
@@ -99,7 +99,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             reward_failure=str(exception)
         )
     else:
-        logger.info("on_reward_ticket_id: updating ticket to paid:", ticket_id)
+        logger.info(f"on_reward_ticket_id: updating ticket to paid: {ticket_id}")
         await update_ticket(
             ticket.id,
             state={
@@ -111,10 +111,10 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             reward_payment_hash=payment_hash
         )
     competition_complete = await is_competition_payment_complete(ticket.competition)
-    logger.info("on_reward_ticket_id: competition_complete:", ticket_id, competition_complete)
+    logger.info(f"on_reward_ticket_id: competition_complete: {ticket_id} {competition_complete}")
     if competition_complete:
         await cas_competition_state(
             ticket.competition,
-            old_state="COMPLETED_PAYING",
-            state="COMPLETED_PAID"
+            "COMPLETED_PAYING",
+            "COMPLETED_PAID"
         )
