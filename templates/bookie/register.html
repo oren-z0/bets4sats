@@ -90,6 +90,8 @@
     )
     obj.displayUrl = '/bookie/tickets/' + obj.id
     obj.choiceText = '#' + obj.choice + ' - ' + choices[obj.choice].title
+    const rewardMSat = '000' + obj.reward_msat
+    obj.rewardSats = rewardMSat.slice(0, -3).replace(/^0+/, '') + ('.' + rewardMSat.slice(-3).replace(/0+$/, '')).replace('.0', '')
     return obj
   }
   new Vue({
@@ -104,6 +106,7 @@
             {name: 'state', align: 'left', label: 'State', field: 'state'},
             {name: 'reward_target', align: 'left', label: 'Reward Target', field: 'reward_target'},
             {name: 'amount', align: 'left', label: 'Amount (sats)', field: 'amount'},
+            {name: 'rewardSats', align: 'left', label: 'Rewarded (sats)', field: 'rewardSats'},
             {name: 'choiceText', align: 'left', label: 'Choice', field: 'choiceText'},
           ],
           pagination: {
