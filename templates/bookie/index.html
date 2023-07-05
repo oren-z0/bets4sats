@@ -624,7 +624,7 @@
         self = this
         LNbits.api
           .request(
-            'PATCH',
+            'POST',
             '/bookie/api/v1/competitions/' + self.formDialog.data.id + '/complete',
             wallet.inkey,
             {
