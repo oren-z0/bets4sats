@@ -162,7 +162,7 @@ async def set_winning_choice(competition_id: str, winning_choice: int) -> None:
     )
 
 async def sum_choices_amounts(competition_id: str) -> List[ChoiceAmountSum]:
-    choices = await db.execute(
+    choices = await db.fetchall(
         """
         SELECT choice, SUM(amount) amount_sum
         FROM bookie.tickets
@@ -249,8 +249,8 @@ async def get_state_competition_tickets(competition_id: str, state: str) -> List
     return [Ticket(**row) for row in rows]
 
 async def is_competition_payment_complete(competition_id: str) -> List[Ticket]:
-    rows = await db.fetchall(
+    row = await db.fetchone(
         "SELECT id FROM bookie.tickets WHERE competition = ? AND state != ? AND state != ? AND state != ? AND state != ? LIMIT 1",
         (competition_id, "CANCELLED_PAID", "CANCELLED_PAYMENT_FAILED", "WON_PAID", "WON_PAYMENT_FAILED"),
     )
-    return not rows
+    return not row
