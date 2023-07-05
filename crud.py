@@ -177,7 +177,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
     await db.execute(
         """
         UPDATE bookie.competitions
-        SET choices = ? AND winning_choice = ?
+        SET choices = ?, winning_choice = ?
         WHERE id = ?
         """,
         (choices, winning_choice, competition_id)
