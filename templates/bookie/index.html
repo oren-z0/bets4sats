@@ -219,7 +219,7 @@
               dense
               v-model.trim="formDialog.data.banner"
               type="text"
-              label="Banner url (optional) "
+              label="Banner image url (optional) "
               :disable="formDialog.data.id != null"
             ></q-input>
           </div>
@@ -273,7 +273,7 @@
               dense
               v-model.number="formDialog.data.min_bet"
               type="number"
-              label="Min bet in sats (at least 10 sats) "
+              label="Min bet in sats (at least 10) "
               :disable="formDialog.data.id != null"
             ></q-input>
           </div>
@@ -382,7 +382,8 @@
 
   function defaultFormDialogData() {
     return {
-      choices: [{ title: "Team A" }, { title: "Team B" }]
+      choices: [{ title: "Team A" }, { title: "Team B" }],
+      min_bet: 10,
     }
   }
 
