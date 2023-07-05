@@ -579,9 +579,6 @@
         this.formDialog.show = true
       },
       updateCompetition: function (wallet, data) {
-        const wallet = _.findWhere(this.g.user.wallets, {
-          id: this.formDialog.data.wallet
-        })
         const competitionId = this.formDialog.data.id
         const self = this
 
