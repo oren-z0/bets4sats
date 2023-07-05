@@ -121,7 +121,7 @@ async def api_competition_complete(data: CompleteCompetition, competition_id: st
     unpaid_winning_tickets = await get_state_competition_tickets(competition_id, "WON_UNPAID")
     for ticket in unpaid_winning_tickets:
         reward_ticket_ids_queue.put(ticket.id)
-    competition = await get_competition()
+    competition = await get_competition(competition_id)
     return competition.dict()
 
 @bookie_ext.delete("/api/v1/competitions/{competition_id}")
