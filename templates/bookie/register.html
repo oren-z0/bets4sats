@@ -5,7 +5,7 @@
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
         <center>
-          <h3 class="q-my-none">{{ competition_name }} Registration</h3>
+          <h3 class="q-my-none">{{ competition_name }} - Registration</h3>
           <br />
 
           <br />
@@ -88,7 +88,7 @@
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.displayUrl = '/bookie/ticket/' + obj.id
+    obj.displayUrl = '/bookie/tickets/' + obj.id
     obj.choiceText = '#' + obj.choice + ' - ' + choices[obj.choice].title
     return obj
   }
@@ -152,7 +152,7 @@
               message: 'Found!'
             })
             setTimeout(function () {
-              window.location.href = '/bookie/ticket/' + res.data.ticket_id
+              window.location.href = '/bookie/tickets/' + res.data.ticket_id
             }, 2000)
           })
           .catch(function (error) {

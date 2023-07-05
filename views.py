@@ -50,7 +50,7 @@ async def display(request: Request, competition_id):
     )
 
 
-@bookie_ext.get("/ticket/{ticket_id}", response_class=HTMLResponse)
+@bookie_ext.get("/tickets/{ticket_id}", response_class=HTMLResponse)
 async def ticket(request: Request, ticket_id):
     ticket = await get_ticket(ticket_id)
     if not ticket:

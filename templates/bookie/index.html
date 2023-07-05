@@ -135,7 +135,7 @@
                   icon="local_activity"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/bookie/ticket/' + props.row.id"
+                  :href="props.row.displayUrl
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -378,6 +378,14 @@
     obj.displayUrl = '/bookie/competitions/' + obj.id
     return obj
   }
+  const mapTicket = function (obj) {
+    obj.date = Quasar.utils.date.formatDate(
+      new Date(obj.time * 1000),
+      'YYYY-MM-DD HH:mm'
+    )
+    obj.displayUrl = '/bookie/tickets/' + obj.id
+    return obj
+  }
 
   function defaultFormDialogData() {
     return {
@@ -475,7 +483,7 @@
           )
           .then(function (response) {
             self.tickets = response.data.map(function (obj) {
-              return mapCompetition(obj)
+              return mapTicket(obj)
             })
           })
       },
