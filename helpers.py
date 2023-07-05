@@ -88,7 +88,7 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
     except:
         raise Exception("Unparsable lnurlp callback")
     comment = description if len(description) <= params.commentAllowed else ""
-    full_callback_url = params.callback + ("&" if parsed_callback.query else "?") + f"amount={amount_msat}" + (
+    full_callback_url = params.callback + ("&" if parsed_callback.query else "?") + f"amount={final_amount_msat}" + (
         f"&comment={quote(comment)}" if comment else ""
     )
     async with httpx.AsyncClient() as client:
@@ -109,7 +109,7 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
         decoded_payment_request = bolt11.decode(pr)
     except:
         raise Exception("Failed to parse bolt11 payment request")
-    logger.info(f"pay_lnurlp: decoded pr: {decoded_payment_request}")
+    logger.info(f"pay_lnurlp: decoded pr amount_msat: {decoded_payment_request.amount_msat}")
     if decoded_payment_request.amount_msat > final_amount_msat:
         raise Exception("Amount in invoice is higher than requested")
     logger.info("pay_lnurlp: paying invoice")
