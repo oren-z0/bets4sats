@@ -297,7 +297,7 @@
               dense
               v-model.trim="formDialog.data.closing_date"
               type="date"
-              :disable="formDialog.data.state != 'INITIAL'"
+              :disable="formDialog.data.id && (formDialog.data.state != 'INITIAL')"
             ></q-input>
           </div>
           <div class="col-4">
@@ -306,7 +306,7 @@
               dense
               v-model.trim="formDialog.data.closing_time"
               type="time"
-              :disable="formDialog.data.state != 'INITIAL'"
+              :disable="formDialog.data.id && (formDialog.data.state != 'INITIAL')"
             ></q-input>
           </div>
         </div>
@@ -319,7 +319,7 @@
               v-model.number="formDialog.data.amount_tickets"
               type="number"
               label="Amount of tickets "
-              :disable="formDialog.data.state != 'INITIAL'"
+              :disable="formDialog.data.id && (formDialog.data.state != 'INITIAL')"
             ></q-input>
           </div>
         </div>
