@@ -252,7 +252,7 @@ async def get_state_competition_tickets(competition_id: str, states: List[str]) 
 
 async def is_competition_payment_complete(competition_id: str) -> List[Ticket]:
     row = await db.fetchone(
-        "SELECT id FROM bookie.tickets WHERE competition = ? AND state != ? AND state != ? AND state != ? AND state != ? LIMIT 1",
-        (competition_id, "CANCELLED_PAID", "CANCELLED_PAYMENT_FAILED", "WON_PAID", "WON_PAYMENT_FAILED"),
+        "SELECT id FROM bookie.tickets WHERE competition = ? AND state != ? AND state != ? AND state != ? AND state != ? AND state != ? LIMIT 1",
+        (competition_id, "CANCELLED_PAID", "CANCELLED_PAYMENT_FAILED", "WON_PAID", "WON_PAYMENT_FAILED", "LOST"),
     )
     return not row
