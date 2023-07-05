@@ -82,7 +82,7 @@ async def ticket(request: Request, ticket_id):
 @bookie_ext.get("/register/{competition_id}/{register_id}", response_class=HTMLResponse)
 async def register(request: Request, competition_id, register_id):
     competition = await get_competition(competition_id)
-    if competition is None or not hmac.compare_digst(competition.register_id, register_id):
+    if competition is None or not hmac.compare_digest(competition.register_id, register_id):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
