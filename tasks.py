@@ -76,10 +76,13 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             description_prefix = "BookieRefund"
         else: # WON_PAYING
             competition = await get_competition(ticket.competition)
+            logger.info(f"on_reward_ticket_id: got competition: {ticket_id} {competition}")
             choices = json.loads(competition.choices)
+            logger.info(f"on_reward_ticket_id: calculating reward: {ticket_id}")
             total_msat = sum(choice["total"] for choice in choices) * 1000
             reward_msat = total_msat * ticket.amount * (100 - PRIZE_FEE_PERCENT) // (choices[ticket.choice]["total"] * 100)
             description_prefix = "BookieReward"
+        logger.info(f"on_reward_ticket_id: reward_msat: {ticket_id} {reward_msat}")
         logger.info(f"on_reward_ticket_id: paying lnurlp: {ticket_id}")
         payment_hash, final_reward_msat = await pay_lnurlp(
             ticket.wallet,
