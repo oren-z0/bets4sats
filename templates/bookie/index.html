@@ -229,7 +229,7 @@
           <div class="col-12">Choices:</div>
         </div>
         <div class="row" v-for="(choice, index) in formDialog.data.choices">
-          <div class="col-11">
+          <div class="col-10">
             <q-input
               filled
               dense
@@ -238,7 +238,7 @@
               :disable="formDialog.data.id != null"
             ></q-input>
           </div>
-          <div class="col-1">
+          <div class="col-2">
             <q-btn
               flat
               dense
@@ -370,13 +370,12 @@
 </div>
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
 <script>
-  var mapCompetitions = function (obj) {
+  const mapCompetition = function (obj) {
     obj.date = Quasar.utils.date.formatDate(
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
-    obj.displayUrl = ['/bookie/', obj.id].join('')
+    obj.displayUrl = '/bookie/competitions/' + obj.id
     return obj
   }
 
@@ -476,7 +475,7 @@
           )
           .then(function (response) {
             self.tickets = response.data.map(function (obj) {
-              return mapCompetitions(obj)
+              return mapCompetition(obj)
             })
           })
       },
@@ -518,7 +517,7 @@
           )
           .then(function (response) {
             self.competitions = response.data.map(function (obj) {
-              return mapCompetitions(obj)
+              return mapCompetition(obj)
             })
           })
       },
@@ -549,7 +548,7 @@
         LNbits.api
           .request('POST', '/bookie/api/v1/competitions', wallet.inkey, data)
           .then(function (response) {
-            self.competitions.push(mapCompetitions(response.data))
+            self.competitions.push(mapCompetition(response.data))
             self.formDialog.show = false
             self.formDialog.data = defaultFormDialogData()
           })
@@ -593,7 +592,7 @@
             self.competitions = _.reject(self.competitions, function (obj) {
               return obj.id == competitionId
             })
-            self.competitions.push(mapCompetitions(response.data))
+            self.competitions.push(mapCompetition(response.data))
             self.formDialog.show = false
             self.formDialog.data = defaultFormDialogData()
           })
@@ -655,7 +654,7 @@
             self.competitions = _.reject(self.competitions, function (obj) {
               return obj.id == competitionId
             })
-            self.competitions.push(mapCompetitions(response.data))
+            self.competitions.push(mapCompetition(response.data))
             self.formDialog.show = false
             self.formDialog.data = defaultFormDialogData()
           })

@@ -46,7 +46,7 @@
                   icon="local_activity"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/bookie/ticket/' + props.row.id"
+                  :href="props.row.displayUrl"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -82,13 +82,14 @@
 <script>
   Vue.component(VueQrcode.name, VueQrcode)
   Vue.use(VueQrcodeReader)
-  var mapCompetitions = function (obj) {
+  const choices = {{ competition_choices | safe }}
+  const mapTicket = function (obj) {
     obj.date = Quasar.utils.date.formatDate(
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
-    obj.displayUrl = ['/bookie/', obj.id].join('')
+    obj.displayUrl = '/bookie/ticket/' + obj.id
+    obj.choiceText = '#' + obj.choice + ' - ' + choices[obj.choice].title
     return obj
   }
   new Vue({
@@ -100,8 +101,10 @@
         ticketsTable: {
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
+            {name: 'state', align: 'left', label: 'State', field: 'state'},
             {name: 'reward_target', align: 'left', label: 'Reward Target', field: 'reward_target'},
-            {name: 'amount', align: 'left', label: 'Amount (sats)', field: 'amount'}
+            {name: 'amount', align: 'left', label: 'Amount (sats)', field: 'amount'},
+            {name: 'choiceText', align: 'left', label: 'Choice', field: 'choiceText'},
           ],
           pagination: {
             rowsPerPage: 10
@@ -166,7 +169,7 @@
           )
           .then(function (response) {
             self.tickets = response.data.map(function (obj) {
-              return mapCompetitions(obj)
+              return mapTicket(obj)
             })
           })
           .catch(function (error) {

@@ -23,7 +23,7 @@ async def index(request: Request, user: User = Depends(check_user_exists)):
     )
 
 
-@bookie_ext.get("/{competition_id}", response_class=HTMLResponse)
+@bookie_ext.get("/competitions/{competition_id}", response_class=HTMLResponse)
 async def display(request: Request, competition_id):
     competition = await get_competition(competition_id)
     if not competition:
@@ -95,6 +95,7 @@ async def register(request: Request, wallet_id, competition_id):
             "request": request,
             "competition_id": competition_id,
             "competition_name": competition.name,
+            "competition_choices": competition.choices,
             "wallet_id": wallet_id,
         },
     )
