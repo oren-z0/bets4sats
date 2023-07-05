@@ -82,6 +82,8 @@ async def api_competition_update(data: UpdateCompetition, competition_id: str, w
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="Not your competition"
         )
+    if competition.state != "INITIAL":
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Cannot change competition after closing")
 
     competition = await update_competition(competition_id, data)
     if competition is None:

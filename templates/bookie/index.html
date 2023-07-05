@@ -297,6 +297,7 @@
               dense
               v-model.trim="formDialog.data.closing_date"
               type="date"
+              :disable="formDialog.data.state != 'INITIAL'"
             ></q-input>
           </div>
           <div class="col-4">
@@ -305,6 +306,7 @@
               dense
               v-model.trim="formDialog.data.closing_time"
               type="time"
+              :disable="formDialog.data.state != 'INITIAL'"
             ></q-input>
           </div>
         </div>
@@ -317,11 +319,12 @@
               v-model.number="formDialog.data.amount_tickets"
               type="number"
               label="Amount of tickets "
+              :disable="formDialog.data.state != 'INITIAL'"
             ></q-input>
           </div>
         </div>
 
-        <div class="row q-mt-lg">
+        <div class="row q-mt-lg" v-if="!formDialog.data.id || formDialog.data.state == 'INITIAL'">
           <q-btn
             v-if="formDialog.data.id"
             unelevated
@@ -330,7 +333,7 @@
             >Update Competition</q-btn
           >
           <q-btn
-            v-else
+            v-if="!formDialog.data.id"
             unelevated
             color="primary"
             :disable="!formDialog.data.wallet || !formDialog.data.name || !formDialog.data.info || !formDialog.data.closing_date || !formDialog.data.closing_time || !Number.isSafeInteger(formDialog.data.amount_tickets) || formDialog.data.amount_tickets < 0 || !Number.isSafeInteger(formDialog.data.min_bet) || !Number.isSafeInteger(formDialog.data.max_bet) || formDialog.data.min_bet < 10 || formDialog.data.max_bet < formDialog.data.min_bet || 21_000_000_00_000_000 <= formDialog.data.max_bet"
