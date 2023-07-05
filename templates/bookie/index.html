@@ -251,6 +251,30 @@
             Add New Choice
           </q-btn>
         </div>
+
+        <div class="row">
+          <div class="col-6">
+            <q-input
+              filled
+              dense
+              v-model.number="formDialog.data.min_bet"
+              type="number"
+              label="Min bet in sats (at least 10 sats) "
+              :disable="formDialog.data.id != null"
+            ></q-input>
+          </div>
+          <div class="col-6">
+            <q-input
+              filled
+              dense
+              v-model.number="formDialog.data.max_bet"
+              type="number"
+              label="Max bet in sats "
+              :disable="formDialog.data.id != null"
+            ></q-input>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-4">Ticket closing date (UTC)</div>
           <div class="col-4">
@@ -283,29 +307,6 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-6">
-            <q-input
-              filled
-              dense
-              v-model.number="formDialog.data.min_bet"
-              type="number"
-              label="Min bet in sats "
-              :disable="formDialog.data.id != null"
-            ></q-input>
-          </div>
-          <div class="col-6">
-            <q-input
-              filled
-              dense
-              v-model.number="formDialog.data.max_bet"
-              type="number"
-              label="Max bet in sats "
-              :disable="formDialog.data.id != null"
-            ></q-input>
-          </div>
-        </div>
-
         <div class="row q-mt-lg">
           <q-btn
             v-if="formDialog.data.id"
@@ -318,7 +319,7 @@
             v-else
             unelevated
             color="primary"
-            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.min_bet == null || formDialog.data.max_bet == null || Number(formDialog.data.min_bet) <= 0 || Number(formDialog.data.max_bet) < Number(formDialog.data.min_bet) || 21_000_000_00_000_000 <= Number(formDialog.data.max_bet)"
+            :disable="formDialog.data.wallet == null || formDialog.data.name == null || formDialog.data.info == null || formDialog.data.closing_date == null || formDialog.data.closing_time == null || formDialog.data.amount_tickets == null || formDialog.data.amount_tickets < 0 || !Number.isSafeInteger(formDialog.data.amount_tickets) || formDialog.data.min_bet == null || formDialog.data.max_bet == null || formDialog.data.min_bet < 10 || !Number.isSafeInteger(formDialog.data.min_bet) || formDialog.data.max_bet < formDialog.data.min_bet || 21_000_000_00_000_000 <= formDialog.data.max_bet || !Number.isSafeInteger(formDialog.data.max_bet)"
             type="submit"
             >Create Competition</q-btn
           >
