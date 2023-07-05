@@ -8,6 +8,7 @@ class CreateCompetition(BaseModel):
     wallet: str
     name: str
     info: str
+    banner: str
     closing_datetime: str
     amount_tickets: int = Query(..., ge=0)
     min_bet: int = Query(..., gt=0, lt=MAX_SATS)
@@ -31,6 +32,7 @@ class Competition(BaseModel):
     wallet: str
     name: str
     info: str
+    banner: str
     closing_datetime: str
     amount_tickets: int
     min_bet: int

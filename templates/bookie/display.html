@@ -1,5 +1,6 @@
 {% extends "public.html" %} {% block page %}
 <div class="row q-col-gutter-md justify-center">
+  <img v-if="banner != ''" :src="banner" style="max-width: 100vw; max-height: 25vh; height: auto;" />
   <div class="col-12 col-md-7 col-lg-6 q-gutter-y-md">
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
@@ -137,6 +138,7 @@
     mixins: [windowMixin],
     data: function () {
       return {
+        banner: {{ competition_banner | safe }},
         isCompetitionOpen: '{{ competition_state }}' === 'INITIAL' && {{ competition_amount_tickets | safe }} > 0 && Date.now() < new Date('{{ competition_closing_datetime }}').getTime(),
         choices: {{ competition_choices | safe }},
         paymentReq: null,

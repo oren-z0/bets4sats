@@ -38,6 +38,7 @@ async def display(request: Request, competition_id):
             "competition_id": competition_id,
             "competition_name": competition.name,
             "competition_info": competition.info,
+            "competition_banner": json.dumps(competition.banner),
             "competition_state": competition.state,
             "competition_closing_datetime": competition.closing_datetime,
             "competition_choices": competition.choices,

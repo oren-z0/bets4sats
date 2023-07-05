@@ -6,6 +6,7 @@ async def m001_initial(db):
             wallet TEXT NOT NULL,
             name TEXT NOT NULL,
             info TEXT NOT NULL,
+            banner TEXT NOT NULL,
             closing_datetime TEXT NOT NULL,
             amount_tickets INTEGER NOT NULL,
             min_bet INTEGER NOT NULL,

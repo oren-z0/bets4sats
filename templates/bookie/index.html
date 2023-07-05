@@ -184,7 +184,7 @@
               filled
               dense
               v-model.trim="formDialog.data.name"
-              type="name"
+              type="text"
               label="Title of competition "
               :disable="formDialog.data.id != null"
             ></q-input>
@@ -211,6 +211,20 @@
           label="Info about the competition "
           :disable="formDialog.data.id != null"
         ></q-input>
+
+        <div class="row">
+          <div class="col">
+            <q-input
+              filled
+              dense
+              v-model.trim="formDialog.data.banner"
+              type="text"
+              label="Banner url (optional) "
+              :disable="formDialog.data.id != null"
+            ></q-input>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-12">Choices:</div>
         </div>
