@@ -549,7 +549,7 @@
           choices: parsedChoices,
           complete_choices: [
             cancelChoice,
-            ...choices.map((choice, index) => ({
+            ...parsedChoices.map((choice, index) => ({
               label: choice.title,
               value: index,
               disable: choice.total == 0,
