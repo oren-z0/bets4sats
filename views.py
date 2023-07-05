@@ -1,4 +1,5 @@
 import json
+import hmac
 from datetime import datetime
 from http import HTTPStatus
 
@@ -78,16 +79,12 @@ async def ticket(request: Request, ticket_id):
     )
 
 
-@bookie_ext.get("/register/{wallet_id}/{competition_id}", response_class=HTMLResponse)
-async def register(request: Request, wallet_id, competition_id):
+@bookie_ext.get("/register/{competition_id}/{register_id}", response_class=HTMLResponse)
+async def register(request: Request, competition_id, register_id):
     competition = await get_competition(competition_id)
-    if not competition:
+    if competition is None or not hmac.compare_digst(competition.register_id, register_id):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
-        )
-    if competition.wallet != wallet_id:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Competition not found in wallet."
         )
     return bookie_renderer().TemplateResponse(
         "bookie/register.html",
@@ -96,6 +93,6 @@ async def register(request: Request, wallet_id, competition_id):
             "competition_id": competition_id,
             "competition_name": competition.name,
             "competition_choices": competition.choices,
-            "wallet_id": wallet_id,
+            "wallet_id": competition.wallet,
         },
     )

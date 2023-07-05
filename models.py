@@ -30,6 +30,7 @@ class CreateInvoiceForTicket(BaseModel):
 class Competition(BaseModel):
     id: str
     wallet: str
+    register_id: str
     name: str
     info: str
     banner: str

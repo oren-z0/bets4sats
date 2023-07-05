@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from datetime import datetime
 import json
+import hmac
 
 from fastapi import Depends, Query
 import shortuuid
@@ -220,11 +221,16 @@ async def api_ticket_delete(ticket_id, wallet: WalletTypeInfo = Depends(get_key_
 # Competition Tickets
 
 
-@bookie_ext.get("/api/v1/competitiontickets/{wallet_id}/{competition_id}")
-async def api_competition_tickets(wallet_id, competition_id):
+@bookie_ext.get("/api/v1/competitiontickets/{competition_id}/{register_id}")
+async def api_competition_tickets(competition_id, register_id):
+    competition = await get_competition(competition_id)
+    if competition is None or not hmac.compare_digest(competition.register_id, register_id):
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
+        )
     return [
         ticket.dict()
-        for ticket in await get_wallet_competition_tickets(wallet_id=wallet_id, competition_id=competition_id)
+        for ticket in await get_wallet_competition_tickets(competition_id)
     ]
 
 

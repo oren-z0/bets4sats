@@ -4,6 +4,7 @@ async def m001_initial(db):
         CREATE TABLE bookie.competitions (
             id TEXT PRIMARY KEY,
             wallet TEXT NOT NULL,
+            register_id TEXT NOT NULL,
             name TEXT NOT NULL,
             info TEXT NOT NULL,
             banner TEXT NOT NULL,

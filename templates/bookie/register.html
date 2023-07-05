@@ -7,7 +7,7 @@
         <center>
           <h3 class="q-my-none">{{ competition_name }} - Registration</h3>
           <br />
-
+          <h4 class="q-my-none">Competition Id: {{ competition_id }}</h4>
           <br />
 
           <q-btn unelevated color="primary" @click="showCamera" size="xl"
@@ -168,7 +168,7 @@
         LNbits.api
           .request(
             'GET',
-            '/bookie/api/v1/competitiontickets/{{ wallet_id }}/{{ competition_id }}'
+            '/bookie/api/v1/competitiontickets/{{ competition_id }}/{{ register_id }}'
           )
           .then(function (response) {
             self.tickets = response.data.map(function (obj) {

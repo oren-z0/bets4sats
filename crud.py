@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
 import json
 
+import shortuuid
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
@@ -96,14 +97,16 @@ async def delete_competition_tickets(competition_id: str) -> None:
 
 async def create_competition(data: CreateCompetition) -> Competition:
     competition_id = urlsafe_short_hash()
+    register_id = shortuuid.random()
     await db.execute(
         """
-        INSERT INTO bookie.competitions (id, wallet, name, info, banner, closing_datetime, amount_tickets, min_bet, max_bet, sold, choices, winning_choice, state)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO bookie.competitions (id, wallet, register_id, name, info, banner, closing_datetime, amount_tickets, min_bet, max_bet, sold, choices, winning_choice, state)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             competition_id,
             data.wallet,
+            register_id,
             data.name,
             data.info,
             data.banner,
@@ -234,10 +237,10 @@ async def delete_competition(competition_id: str) -> None:
 # COMPETITIONTICKETS
 
 
-async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) -> List[Ticket]:
+async def get_wallet_competition_tickets(competition_id: str) -> List[Ticket]:
     rows = await db.fetchall(
-        "SELECT * FROM bookie.tickets WHERE wallet = ? AND competition = ?",
-        (wallet_id, competition_id),
+        "SELECT * FROM bookie.tickets WHERE competition = ?",
+        (competition_id,),
     )
     return [Ticket(**row) for row in rows]
 
