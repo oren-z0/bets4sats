@@ -99,7 +99,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             reward_failure=str(exception)
         )
     else:
-        logger.warning("on_reward_ticket_id: updating ticket to paid:", ticket_id)
+        logger.info("on_reward_ticket_id: updating ticket to paid:", ticket_id)
         await update_ticket(
             ticket.id,
             state={
@@ -111,7 +111,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             reward_payment_hash=payment_hash
         )
     competition_complete = await is_competition_payment_complete(ticket.competition)
-    logger.warning("on_reward_ticket_id: competition_complete:", ticket_id, competition_complete)
+    logger.info("on_reward_ticket_id: competition_complete:", ticket_id, competition_complete)
     if competition_complete:
         await cas_competition_state(
             ticket.competition,
