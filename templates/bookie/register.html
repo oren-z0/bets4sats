@@ -91,7 +91,9 @@
     obj.displayUrl = '/bookie/tickets/' + obj.id
     obj.choiceText = '#' + obj.choice + ' - ' + choices[obj.choice].title
     const rewardMSat = '000' + obj.reward_msat
-    obj.rewardSats = rewardMSat.slice(0, -3).replace(/^0+/, '') + ('.' + rewardMSat.slice(-3).replace(/0+$/, '')).replace('.0', '')
+    const wholeSats = rewardMSat.slice(0, -3).replace(/^0+/, '')
+    const fractionSats = '.' + rewardMSat.slice(-3).replace(/0+$/, '')
+    obj.rewardSats = (wholeSats || '0') + (fractionSats !== '.' ? fractionSats : '')
     return obj
   }
   new Vue({
