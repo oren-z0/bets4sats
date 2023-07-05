@@ -30,7 +30,7 @@ async def on_invoice_paid(payment: Payment) -> None:
         and isinstance(payment.extra.get("choice"), int)
         and payment.memo and payment.memo.startswith("BookieTicketId:")
     ):
-        competition_id, ticket_id = payment.memo[len("BookieTicketId:"):].split(".") + [""]
+        competition_id, ticket_id = (payment.memo[len("BookieTicketId:"):].split(".") + [""])[:2]
         await send_ticket(
             competition_id,
             ticket_id,
