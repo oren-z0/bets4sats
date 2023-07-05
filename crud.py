@@ -241,10 +241,12 @@ async def get_wallet_competition_tickets(competition_id: str, wallet_id: str) ->
     )
     return [Ticket(**row) for row in rows]
 
-async def get_state_competition_tickets(competition_id: str, state: str) -> List[Ticket]:
+async def get_state_competition_tickets(competition_id: str, states: List[str]) -> List[Ticket]:
+    assert len(states) > 0, "get_state_competition_tickets called with no states"
+    query = " OR ".join(["state = ?" for _state in states])
     rows = await db.fetchall(
-        "SELECT * FROM bookie.tickets WHERE state = ? AND competition = ?",
-        (state, competition_id),
+        f"SELECT * FROM bookie.tickets WHERE competition = ? AND ({query})",
+        (competition_id, *states),
     )
     return [Ticket(**row) for row in rows]
 
