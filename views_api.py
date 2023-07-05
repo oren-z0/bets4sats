@@ -109,7 +109,7 @@ async def api_competition_complete(data: CompleteCompetition, competition_id: st
     choices = json.loads(competition.choices)
     if data.winning_choice >= len(choices):
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="winning_choice too high")
-    if choices[data.winning_choice]["total"] == 0:
+    if data.winning_choice >= 0 and choices[data.winning_choice]["total"] == 0:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="no bet on winning choice")
     for choice in choices:
         choice["pre_agg_total"] = choice["total"]
