@@ -4,8 +4,8 @@
 ## Sell tickets for bets on competitions and send back rewards with ease
 
 Bookie alows you to make tickets for bets on competitions.
-Each user chooses an option to bet on, fills a lightning-address to receive future
-rewards, and sends an amount of sats.
+Each user chooses an option to bet on, fills a lightning-address to receive the
+winning reward, and sends an amount of sats.
 When the competition ends, the app-manager selects the option that won, and all
 the rewards will be sent automatically from the wallet to the winners' lightning
 addresses, proportionally to the size of their bets.
