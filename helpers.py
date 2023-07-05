@@ -11,6 +11,7 @@ from lnbits.core.models import PaymentFilters
 from lnbits.db import Filters, Filter
 from starlette.exceptions import HTTPException
 import httpx
+from loguru import logger
 
 from .crud import create_ticket, get_competition, get_ticket
 from .models import LnurlpParameters
@@ -72,7 +73,9 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
     # This may actually deduct too much, because the final fee will be
     # fee_reserve(final_amount_msat) <= fee_reserve(amount_msat), but the exact calculation
     # might get complicated if fee_reserve changes.
+    logger.info(f"pay_lnurlp: called {code} {amount_msat} {description} {extra}")
     final_amount_msat = amount_msat - fee_reserve(amount_msat)
+    logger.info(f"pay_lnurlp: final-amount-msat: {final_amount_msat}")
     if final_amount_msat <= 0:
         raise Exception("Payment is negative or zero after deducting lightning fees")
     params = await get_lnurlp_parameters(code)
@@ -101,12 +104,15 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
     pr = data.get("pr")
     if not isinstance(pr, str):
         raise Exception("Unexpected callback response parameters types")
+    logger.info(f"pay_lnurlp: decoding pr {pr}")
     try:
         decoded_payment_request = bolt11.decode(pr)
     except:
         raise Exception("Failed to parse bolt11 payment request")
+    logger.info(f"pay_lnurlp: decoded pr: {decoded_payment_request}")
     if decoded_payment_request.amount_msat > final_amount_msat:
         raise Exception("Amount in invoice is higher than requested")
+    logger.info("pay_lnurlp: paying invoice")
     # Should we check invoice description?
     payment_hash = await pay_invoice(
         wallet_id=wallet_id,
