@@ -120,7 +120,7 @@ async def api_competition_complete(data: CompleteCompetition, competition_id: st
     await update_competition_winners(competition_id, json.dumps(choices), data.winning_choice)
     unpaid_winning_tickets = await get_state_competition_tickets(competition_id, "WON_UNPAID")
     for ticket in unpaid_winning_tickets:
-        reward_ticket_ids_queue.put(ticket.id)
+        reward_ticket_ids_queue.put_nowait(ticket.id)
     competition = await get_competition(competition_id)
     return competition.dict()
 
