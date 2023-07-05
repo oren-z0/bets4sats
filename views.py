@@ -93,6 +93,6 @@ async def register(request: Request, competition_id, register_id):
             "competition_id": competition_id,
             "competition_name": competition.name,
             "competition_choices": competition.choices,
-            "wallet_id": competition.wallet,
+            "register_id": competition.register_id,
         },
     )
