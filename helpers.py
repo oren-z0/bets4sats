@@ -3,6 +3,7 @@ from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import urlparse, quote
 import json
+import re
 
 from lnbits import lnurl, bolt11
 from lnbits.core.services import fee_reserve, pay_invoice
@@ -125,6 +126,11 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
 
 # Used both in api and in tasks:
 async def send_ticket(competition_id, ticket_id):
+    if not re.match(r"^\w{1,100}$", ticket_id):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Invalid ticket id.",
+        )
     competition = await get_competition(competition_id)
     if not competition:
         raise HTTPException(
