@@ -90,6 +90,13 @@
     )
     obj.displayUrl = '/bookie/tickets/' + obj.id
     obj.choiceText = '#' + obj.choice + ' - ' + choices[obj.choice].title
+    if (obj.reward_failure) {
+      obj.rewardStatus = 'Failed: ' + obj.reward_failure
+    } else if (obj.reward_payment_hash) {
+      obj.rewardStatus = 'Success'
+    } else {
+      obj.rewardStatus = ''
+    }
     const rewardMSat = '000' + obj.reward_msat
     const wholeSats = rewardMSat.slice(0, -3).replace(/^0+/, '')
     const fractionSats = '.' + rewardMSat.slice(-3).replace(/0+$/, '')
@@ -108,6 +115,7 @@
             {name: 'state', align: 'left', label: 'State', field: 'state'},
             {name: 'reward_target', align: 'left', label: 'Reward Target', field: 'reward_target'},
             {name: 'amount', align: 'left', label: 'Amount (sats)', field: 'amount'},
+            {name: 'rewardStatus', align: 'left', label: 'Reward Status', field: 'rewardStatus'},
             {name: 'rewardSats', align: 'left', label: 'Rewarded (sats)', field: 'rewardSats'},
             {name: 'choiceText', align: 'left', label: 'Choice', field: 'choiceText'},
           ],
