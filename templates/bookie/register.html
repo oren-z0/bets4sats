@@ -165,7 +165,7 @@
               message: 'Found!'
             })
             setTimeout(function () {
-              window.location.href = '/bookie/tickets/' + res.data.ticket_id
+              window.location.href = '/bookie/tickets/' + response.data.id
             }, 2000)
           })
           .catch(function (error) {
