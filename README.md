@@ -53,3 +53,14 @@ via the QR code\
 6. Choose a winner, automatically pay all the rewards. Failed payments will be
 mentioned in the tickets table, so you could see them when the ticket owners
 contact you. ![complete competition](https://i.imgur.com/XO4Esgd.png)
+
+## Credit
+
+Created by: [Oren-Z0](https://github.com/oren-z0)
+
+Logo:
+Icons made by [Freepik](https://www.flaticon.com/authors/freepik) from
+[www.flaticon.com](https://www.flaticon.com).
+
+This project was forked from [Events](https://github.com/lnbits/events)
+by [Ben Arc](https://github.com/benarc)
