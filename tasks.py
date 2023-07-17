@@ -26,12 +26,12 @@ async def on_invoice_paid(payment: Payment) -> None:
     # (avoid loops)
     if (
         payment.extra
-        and "bookie" == payment.extra.get("tag")
+        and "bets4sats" == payment.extra.get("tag")
         and isinstance(payment.extra.get("reward_target"), str)
         and isinstance(payment.extra.get("choice"), int)
-        and payment.memo and payment.memo.startswith("BookieTicketId:")
+        and payment.memo and payment.memo.startswith("Bets4SatsTicketId:")
     ):
-        competition_id, ticket_id = (payment.memo[len("BookieTicketId:"):].split(".") + [""])[:2]
+        competition_id, ticket_id = (payment.memo[len("Bets4SatsTicketId:"):].split(".") + [""])[:2]
         await send_ticket(
             competition_id,
             ticket_id,
@@ -73,7 +73,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             return
         if ticket.state == "CANCELLED_PAYING":
             reward_msat = ticket.amount * 1000
-            description_prefix = "BookieRefund"
+            description_prefix = "Bets4SatsRefund"
         else: # WON_PAYING
             competition = await get_competition(ticket.competition)
             logger.info(f"on_reward_ticket_id: got competition: {ticket_id} {competition}")
@@ -81,7 +81,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             logger.info(f"on_reward_ticket_id: calculating reward: {ticket_id}")
             total_msat = sum(choice["total"] for choice in choices) * 1000
             reward_msat = total_msat * ticket.amount * (100 - PRIZE_FEE_PERCENT) // (choices[ticket.choice]["total"] * 100)
-            description_prefix = "BookieReward"
+            description_prefix = "Bets4SatsReward"
         logger.info(f"on_reward_ticket_id: reward_msat: {ticket_id} {reward_msat}")
         logger.info(f"on_reward_ticket_id: paying lnurlp: {ticket_id}")
         payment_hash, final_reward_msat = await pay_lnurlp(
@@ -89,7 +89,7 @@ async def on_reward_ticket_id(ticket_id: str) -> None:
             ticket.reward_target,
             reward_msat,
             f"{description_prefix}:{ticket.competition}.{ticket.id}",
-            {"tag":"bookie"}
+            {"tag":"bets4sats"}
         )
     except Exception as exception:
         logger.warning(f"on_reward_ticket_id: failed: {ticket_id} {exception}")

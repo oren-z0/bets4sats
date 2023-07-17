@@ -1,9 +1,9 @@
-# Bookie - <small>[LNbits](https://github.com/lnbits/lnbits) extension</small>
+# Bets4Sats - <small>[LNbits](https://github.com/lnbits/lnbits) extension</small>
 <small>For more about LNBits extension check [this tutorial](https://github.com/lnbits/lnbits/wiki/LNbits-Extensions)</small>
 
 ## Sell tickets for bets on competitions and send back rewards with ease
 
-Bookie alows you to make tickets for bets on competitions.
+Bets4Sats alows you to make tickets for bets on competitions.
 Each user chooses an option to bet on, fills a lightning-address to receive the
 winning reward, and sends an amount of sats.
 When the competition ends, the app-manager selects the option that won, and all
@@ -11,7 +11,7 @@ the rewards will be sent automatically from the wallet to the winners' lightning
 addresses, proportionally to the size of their bets.
 The app manager keeps 1% of the rewards. Lightning fees are deducted from the users.
 
-Bookie includes a shareable ticket scanner, which can be used to find the tickets
+Bets4Sats includes a shareable ticket scanner, which can be used to find the tickets
 in case of disputes.
 
 ## Usage

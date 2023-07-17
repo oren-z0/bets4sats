@@ -62,7 +62,7 @@
                   icon="how_to_reg"
                   :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
                   type="a"
-                  :href="'/bookie/register/' + props.row.id + '/' + props.row.register_id"
+                  :href="'/bets4sats/register/' + props.row.id + '/' + props.row.register_id"
                   target="_blank"
                 ></q-btn>
               </q-td>
@@ -165,12 +165,12 @@
     <q-card>
       <q-card-section>
         <h6 class="text-subtitle1 q-my-none">
-          {{SITE_TITLE}} Bookie extension
+          {{SITE_TITLE}} Bets4Sats extension
         </h6>
       </q-card-section>
       <q-card-section class="q-pa-none">
         <q-separator></q-separator>
-        <q-list> {% include "bookie/_api_docs.html" %} </q-list>
+        <q-list> {% include "bets4sats/_api_docs.html" %} </q-list>
       </q-card-section>
     </q-card>
   </div>
@@ -378,7 +378,7 @@
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.displayUrl = '/bookie/competitions/' + obj.id
+    obj.displayUrl = '/bets4sats/competitions/' + obj.id
     return obj
   }
   const mapTicket = function (obj) {
@@ -386,7 +386,7 @@
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.displayUrl = '/bookie/tickets/' + obj.id
+    obj.displayUrl = '/bets4sats/tickets/' + obj.id
     return obj
   }
 
@@ -481,7 +481,7 @@
         LNbits.api
           .request(
             'GET',
-            '/bookie/api/v1/tickets?all_wallets=true',
+            '/bets4sats/api/v1/tickets?all_wallets=true',
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
@@ -500,7 +500,7 @@
             LNbits.api
               .request(
                 'DELETE',
-                '/bookie/api/v1/tickets/' + ticketId,
+                '/bets4sats/api/v1/tickets/' + ticketId,
                 _.findWhere(self.g.user.wallets, {id: tickets.wallet}).inkey
               )
               .then(function (response) {
@@ -523,7 +523,7 @@
         LNbits.api
           .request(
             'GET',
-            '/bookie/api/v1/competitions?all_wallets=true',
+            '/bets4sats/api/v1/competitions?all_wallets=true',
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
@@ -557,7 +557,7 @@
       createCompetition: function (wallet, data) {
         var self = this
         LNbits.api
-          .request('POST', '/bookie/api/v1/competitions', wallet.inkey, data)
+          .request('POST', '/bets4sats/api/v1/competitions', wallet.inkey, data)
           .then(function (response) {
             self.competitions.push(mapCompetition(response.data))
             self.formDialog.show = false
@@ -595,7 +595,7 @@
         LNbits.api
           .request(
             'PATCH',
-            '/bookie/api/v1/competitions/' + competitionId,
+            '/bets4sats/api/v1/competitions/' + competitionId,
             wallet.inkey,
             data
           )
@@ -621,7 +621,7 @@
             LNbits.api
               .request(
                 'DELETE',
-                '/bookie/api/v1/competitions/' + competitionId,
+                '/bets4sats/api/v1/competitions/' + competitionId,
                 _.findWhere(self.g.user.wallets, {id: competitions.wallet}).inkey
               )
               .then(function (response) {
@@ -655,7 +655,7 @@
         LNbits.api
           .request(
             'POST',
-            '/bookie/api/v1/competitions/' + competitionId + '/complete',
+            '/bets4sats/api/v1/competitions/' + competitionId + '/complete',
             wallet.inkey,
             {
               winning_choice: self.formDialog.data.winning_choice,

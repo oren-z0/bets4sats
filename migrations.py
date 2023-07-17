@@ -1,7 +1,7 @@
 async def m001_initial(db):
     await db.execute(
         """
-        CREATE TABLE bookie.competitions (
+        CREATE TABLE bets4sats.competitions (
             id TEXT PRIMARY KEY,
             wallet TEXT NOT NULL,
             register_id TEXT NOT NULL,
@@ -27,7 +27,7 @@ async def m001_initial(db):
 async def m002_changed(db):
     await db.execute(
         """
-        CREATE TABLE bookie.tickets (
+        CREATE TABLE bets4sats.tickets (
             id TEXT PRIMARY KEY,
             wallet TEXT NOT NULL,
             competition TEXT NOT NULL,

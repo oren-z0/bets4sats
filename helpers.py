@@ -145,7 +145,7 @@ async def send_ticket(competition_id, ticket_id):
         filters=Filters(
             filters=[Filter(
               field="memo",
-              values=[f"BookieTicketId:{competition_id}.{ticket_id}"],
+              values=[f"Bets4SatsTicketId:{competition_id}.{ticket_id}"],
               model=PaymentFilters
             )],
             model=PaymentFilters,

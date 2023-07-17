@@ -195,7 +195,7 @@
         var self = this
         axios
           .post(
-            '/bookie/api/v1/tickets/{{ competition_id }}',
+            '/bets4sats/api/v1/tickets/{{ competition_id }}',
             {
               reward_target: self.formDialog.data.reward_target,
               amount: Number(self.formDialog.data.amount),
@@ -220,7 +220,7 @@
             paymentChecker = setInterval(function () {
               axios
                 .get(
-                  '/bookie/api/v1/tickets/' +
+                  '/bets4sats/api/v1/tickets/' +
                     '{{ competition_id }}/' +
                     self.ticketId
                 )
@@ -245,11 +245,11 @@
                     self.ticketLink = {
                       show: true,
                       data: {
-                        link: '/bookie/tickets/' + self.ticketId
+                        link: '/bets4sats/tickets/' + self.ticketId
                       }
                     }
                     setTimeout(function () {
-                      window.location.href = '/bookie/tickets/' + self.ticketId
+                      window.location.href = '/bets4sats/tickets/' + self.ticketId
                     }, 3000)
                   }
                 })

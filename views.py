@@ -11,20 +11,20 @@ from starlette.responses import HTMLResponse
 from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 
-from . import bookie_ext, bookie_renderer
+from . import bets4sats_ext, bets4sats_renderer
 from .crud import get_competition, get_ticket
 
 templates = Jinja2Templates(directory="templates")
 
 
-@bookie_ext.get("/", response_class=HTMLResponse)
+@bets4sats_ext.get("/", response_class=HTMLResponse)
 async def index(request: Request, user: User = Depends(check_user_exists)):
-    return bookie_renderer().TemplateResponse(
-        "bookie/index.html", {"request": request, "user": user.dict()}
+    return bets4sats_renderer().TemplateResponse(
+        "bets4sats/index.html", {"request": request, "user": user.dict()}
     )
 
 
-@bookie_ext.get("/competitions/{competition_id}", response_class=HTMLResponse)
+@bets4sats_ext.get("/competitions/{competition_id}", response_class=HTMLResponse)
 async def display(request: Request, competition_id):
     competition = await get_competition(competition_id)
     if not competition:
@@ -32,8 +32,8 @@ async def display(request: Request, competition_id):
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
 
-    return bookie_renderer().TemplateResponse(
-        "bookie/display.html",
+    return bets4sats_renderer().TemplateResponse(
+        "bets4sats/display.html",
         {
             "request": request,
             "competition_id": competition_id,
@@ -51,7 +51,7 @@ async def display(request: Request, competition_id):
     )
 
 
-@bookie_ext.get("/tickets/{ticket_id}", response_class=HTMLResponse)
+@bets4sats_ext.get("/tickets/{ticket_id}", response_class=HTMLResponse)
 async def ticket(request: Request, ticket_id):
     ticket = await get_ticket(ticket_id)
     if not ticket:
@@ -65,8 +65,8 @@ async def ticket(request: Request, ticket_id):
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
 
-    return bookie_renderer().TemplateResponse(
-        "bookie/ticket.html",
+    return bets4sats_renderer().TemplateResponse(
+        "bets4sats/ticket.html",
         {
             "request": request,
             "ticket_id": ticket_id,
@@ -79,15 +79,15 @@ async def ticket(request: Request, ticket_id):
     )
 
 
-@bookie_ext.get("/register/{competition_id}/{register_id}", response_class=HTMLResponse)
+@bets4sats_ext.get("/register/{competition_id}/{register_id}", response_class=HTMLResponse)
 async def register(request: Request, competition_id, register_id):
     competition = await get_competition(competition_id)
     if competition is None or not hmac.compare_digest(competition.register_id, register_id):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Competition does not exist."
         )
-    return bookie_renderer().TemplateResponse(
-        "bookie/register.html",
+    return bets4sats_renderer().TemplateResponse(
+        "bets4sats/register.html",
         {
             "request": request,
             "competition_id": competition_id,

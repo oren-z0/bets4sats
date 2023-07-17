@@ -1,6 +1,6 @@
 {
-	"name": "Bookie",
+	"name": "Bets4Sats",
 	"short_description": "Bet with friends on competitions",
-	"tile": "/bookie/static/image/bookie.png",
+	"tile": "/bets4sats/static/image/bets4sats.png",
 	"contributors": ["benarc", "oren-z0"]
 }

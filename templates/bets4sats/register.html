@@ -88,7 +88,7 @@
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.displayUrl = '/bookie/tickets/' + obj.id
+    obj.displayUrl = '/bets4sats/tickets/' + obj.id
     obj.choiceText = '#' + obj.choice + ' - ' + choices[obj.choice].title
     if (obj.reward_failure) {
       obj.rewardStatus = 'Failed: ' + obj.reward_failure
@@ -140,7 +140,7 @@
         this.sendCamera.show = false
         var self = this
         const [prefix, ticketId] = res.split('//')
-        if (prefix !== 'bookie:') {
+        if (prefix !== 'bets4sats:') {
           self.$q.notify({
             type: 'negative',
             message: 'Invalid QR'
@@ -150,7 +150,7 @@
         LNbits.api
           .request(
             'GET',
-            '/bookie/api/v1/register/ticket/' + ticketId
+            '/bets4sats/api/v1/register/ticket/' + ticketId
           )
           .then(function (response) {
             if (response.data.competition !== '{{ competition_id }}') {
@@ -165,7 +165,7 @@
               message: 'Found!'
             })
             setTimeout(function () {
-              window.location.href = '/bookie/tickets/' + response.data.id
+              window.location.href = '/bets4sats/tickets/' + response.data.id
             }, 2000)
           })
           .catch(function (error) {
@@ -178,7 +178,7 @@
         LNbits.api
           .request(
             'GET',
-            '/bookie/api/v1/competitiontickets/{{ competition_id }}/{{ register_id }}'
+            '/bets4sats/api/v1/competitiontickets/{{ competition_id }}/{{ register_id }}'
           )
           .then(function (response) {
             self.tickets = response.data.map(function (obj) {

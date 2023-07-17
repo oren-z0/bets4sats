@@ -11,7 +11,7 @@ from lnbits.core.crud import get_user
 from lnbits.core.services import create_invoice
 from lnbits.decorators import WalletTypeInfo, get_key_type
 
-from . import bookie_ext
+from . import bets4sats_ext
 from .tasks import reward_ticket_ids_queue
 from .helpers import get_lnurlp_parameters, send_ticket
 from .crud import (
@@ -35,7 +35,7 @@ from .models import CompleteCompetition, CreateCompetition, CreateInvoiceForTick
 # Competitions
 
 
-@bookie_ext.get("/api/v1/competitions")
+@bets4sats_ext.get("/api/v1/competitions")
 async def api_competitions(
     all_wallets: bool = Query(False), wallet: WalletTypeInfo = Depends(get_key_type)
 ):
@@ -48,7 +48,7 @@ async def api_competitions(
     return [competition.dict() for competition in await get_competitions(wallet_ids)]
 
 
-@bookie_ext.post("/api/v1/competitions")
+@bets4sats_ext.post("/api/v1/competitions")
 async def api_competition_create(data: CreateCompetition):
     choices = json.loads(data.choices)
     if not isinstance(choices, list):
@@ -66,7 +66,7 @@ async def api_competition_create(data: CreateCompetition):
 
     return competition.dict()
 
-@bookie_ext.patch("/api/v1/competitions/{competition_id}")
+@bets4sats_ext.patch("/api/v1/competitions/{competition_id}")
 async def api_competition_update(data: UpdateCompetition, competition_id: str, wallet: WalletTypeInfo = Depends(get_key_type)):
     if data.amount_tickets is not None and data.amount_tickets < 0:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="amount_tickets cannot be negative")
@@ -92,7 +92,7 @@ async def api_competition_update(data: UpdateCompetition, competition_id: str, w
         )
     return competition.dict()
 
-@bookie_ext.post("/api/v1/competitions/{competition_id}/complete")
+@bets4sats_ext.post("/api/v1/competitions/{competition_id}/complete")
 async def api_competition_complete(data: CompleteCompetition, competition_id: str, wallet: WalletTypeInfo = Depends(get_key_type)):
     if data.winning_choice < -1:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="winning_choice cannot be below -1")
@@ -127,7 +127,7 @@ async def api_competition_complete(data: CompleteCompetition, competition_id: st
     competition = await get_competition(competition_id)
     return competition.dict()
 
-@bookie_ext.delete("/api/v1/competitions/{competition_id}")
+@bets4sats_ext.delete("/api/v1/competitions/{competition_id}")
 async def api_form_delete(competition_id, wallet: WalletTypeInfo = Depends(get_key_type)):
     competition = await get_competition(competition_id)
     if not competition:
@@ -146,7 +146,7 @@ async def api_form_delete(competition_id, wallet: WalletTypeInfo = Depends(get_k
 #########Tickets##########
 
 
-@bookie_ext.get("/api/v1/tickets")
+@bets4sats_ext.get("/api/v1/tickets")
 async def api_tickets(
     all_wallets: bool = Query(False), wallet: WalletTypeInfo = Depends(get_key_type)
 ):
@@ -159,7 +159,7 @@ async def api_tickets(
     return [ticket.dict() for ticket in await get_tickets(wallet_ids)]
 
 
-@bookie_ext.post("/api/v1/tickets/{competition_id}")
+@bets4sats_ext.post("/api/v1/tickets/{competition_id}")
 async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
     competition = await get_competition(competition_id)
     if not competition:
@@ -192,20 +192,20 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         _payment_hash, payment_request = await create_invoice(
             wallet_id=competition.wallet,
             amount=data.amount,
-            memo=f"BookieTicketId:{competition_id}.{ticket_id}",
-            extra={"tag": "bookie", "reward_target": data.reward_target, "choice": data.choice},
+            memo=f"Bets4SatsTicketId:{competition_id}.{ticket_id}",
+            extra={"tag": "bets4sats", "reward_target": data.reward_target, "choice": data.choice},
         )
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
     return {"ticket_id": ticket_id, "payment_request": payment_request}
 
 
-@bookie_ext.get("/api/v1/tickets/{competition_id}/{ticket_id}")
+@bets4sats_ext.get("/api/v1/tickets/{competition_id}/{ticket_id}")
 async def api_ticket_send_ticket(competition_id, ticket_id):
     response = await send_ticket(competition_id, ticket_id)
     return response
 
-@bookie_ext.delete("/api/v1/tickets/{ticket_id}")
+@bets4sats_ext.delete("/api/v1/tickets/{ticket_id}")
 async def api_ticket_delete(ticket_id, wallet: WalletTypeInfo = Depends(get_key_type)):
     ticket = await get_ticket(ticket_id)
     if not ticket:
@@ -223,7 +223,7 @@ async def api_ticket_delete(ticket_id, wallet: WalletTypeInfo = Depends(get_key_
 # Competition Tickets
 
 
-@bookie_ext.get("/api/v1/competitiontickets/{competition_id}/{register_id}")
+@bets4sats_ext.get("/api/v1/competitiontickets/{competition_id}/{register_id}")
 async def api_competition_tickets(competition_id, register_id):
     competition = await get_competition(competition_id)
     if competition is None or not hmac.compare_digest(competition.register_id, register_id):
@@ -236,7 +236,7 @@ async def api_competition_tickets(competition_id, register_id):
     ]
 
 
-@bookie_ext.get("/api/v1/register/ticket/{ticket_id}")
+@bets4sats_ext.get("/api/v1/register/ticket/{ticket_id}")
 async def api_competition_register_ticket(ticket_id):
     ticket = await get_ticket(ticket_id)
     if not ticket:

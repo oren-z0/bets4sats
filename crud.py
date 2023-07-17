@@ -16,7 +16,7 @@ async def create_ticket(
 ) -> Ticket:
     await db.execute(
         """
-        INSERT INTO bookie.tickets (id, wallet, competition, amount, reward_target, choice, state, reward_msat, reward_failure, reward_payment_hash)
+        INSERT INTO bets4sats.tickets (id, wallet, competition, amount, reward_target, choice, state, reward_msat, reward_failure, reward_payment_hash)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (ticket_id, wallet, competition, amount, reward_target, choice, "INITIAL", 0, "", ""),
@@ -34,7 +34,7 @@ async def create_ticket(
       choices[choice]["total"] += amount
       update_result = await db.execute(
           """
-          UPDATE bookie.competitions
+          UPDATE bets4sats.competitions
           SET sold = ?, amount_tickets = ?, choices = ?
           WHERE id = ? AND amount_tickets = ? AND state = ?
           """,
@@ -50,7 +50,7 @@ async def create_ticket(
 async def cas_ticket_state(ticket_id: str, old_state: str, new_state: str) -> bool:
     update_result = await db.execute(
         """
-        UPDATE bookie.tickets
+        UPDATE bets4sats.tickets
         SET state = ?
         WHERE id = ? AND state = ?
         """,
@@ -61,7 +61,7 @@ async def cas_ticket_state(ticket_id: str, old_state: str, new_state: str) -> bo
 async def update_ticket(ticket_id: str, **kwargs) -> Ticket:
     q = ", ".join([f"{field[0]} = ?" for field in kwargs.items()])
     await db.execute(
-        f"UPDATE bookie.tickets SET {q} WHERE id = ?", (*kwargs.values(), ticket_id)
+        f"UPDATE bets4sats.tickets SET {q} WHERE id = ?", (*kwargs.values(), ticket_id)
     )
     ticket = await get_ticket(ticket_id)
     assert ticket, "Newly updated ticket couldn't be retrieved"
@@ -69,7 +69,7 @@ async def update_ticket(ticket_id: str, **kwargs) -> Ticket:
 
 
 async def get_ticket(ticket_id: str) -> Optional[Ticket]:
-    row = await db.fetchone("SELECT * FROM bookie.tickets WHERE id = ?", (ticket_id,))
+    row = await db.fetchone("SELECT * FROM bets4sats.tickets WHERE id = ?", (ticket_id,))
     return Ticket(**row) if row else None
 
 
@@ -79,17 +79,17 @@ async def get_tickets(wallet_ids: Union[str, List[str]]) -> List[Ticket]:
 
     q = ",".join(["?"] * len(wallet_ids))
     rows = await db.fetchall(
-        f"SELECT * FROM bookie.tickets WHERE wallet IN ({q})", (*wallet_ids,)
+        f"SELECT * FROM bets4sats.tickets WHERE wallet IN ({q})", (*wallet_ids,)
     )
     return [Ticket(**row) for row in rows]
 
 
 async def delete_ticket(ticket_id: str) -> None:
-    await db.execute("DELETE FROM bookie.tickets WHERE id = ?", (ticket_id,))
+    await db.execute("DELETE FROM bets4sats.tickets WHERE id = ?", (ticket_id,))
 
 
 async def delete_competition_tickets(competition_id: str) -> None:
-    await db.execute("DELETE FROM bookie.tickets WHERE competition = ?", (competition_id,))
+    await db.execute("DELETE FROM bets4sats.tickets WHERE competition = ?", (competition_id,))
 
 
 # COMPETITIONS
@@ -100,7 +100,7 @@ async def create_competition(data: CreateCompetition) -> Competition:
     register_id = shortuuid.random()
     await db.execute(
         """
-        INSERT INTO bookie.competitions (id, wallet, register_id, name, info, banner, closing_datetime, amount_tickets, min_bet, max_bet, sold, choices, winning_choice, state)
+        INSERT INTO bets4sats.competitions (id, wallet, register_id, name, info, banner, closing_datetime, amount_tickets, min_bet, max_bet, sold, choices, winning_choice, state)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
@@ -135,7 +135,7 @@ async def update_competition(competition_id: str, data: UpdateCompetition) -> Op
         return await get_competition(competition_id)
     
     update_result = await db.execute(
-        f"UPDATE bookie.competitions SET {', '.join(query)} WHERE id = ? AND state = ?",
+        f"UPDATE bets4sats.competitions SET {', '.join(query)} WHERE id = ? AND state = ?",
         (*values, competition_id, "INITIAL"),
     )
     if update_result.rowcount == 0:
@@ -146,7 +146,7 @@ async def update_competition(competition_id: str, data: UpdateCompetition) -> Op
 async def cas_competition_state(competition_id: str, old_state: str, new_state: str) -> bool:
     update_result = await db.execute(
         """
-        UPDATE bookie.competitions
+        UPDATE bets4sats.competitions
         SET state = ?
         WHERE id = ? AND state = ?
         """,
@@ -157,7 +157,7 @@ async def cas_competition_state(competition_id: str, old_state: str, new_state: 
 async def set_winning_choice(competition_id: str, winning_choice: int) -> None:
     await db.execute(
         """
-        UPDATE bookie.competitions
+        UPDATE bets4sats.competitions
         SET winning_choice = ?
         WHERE id = ?
         """,
@@ -168,7 +168,7 @@ async def sum_choices_amounts(competition_id: str) -> List[ChoiceAmountSum]:
     choices = await db.fetchall(
         """
         SELECT choice, SUM(amount) amount_sum
-        FROM bookie.tickets
+        FROM bets4sats.tickets
         WHERE competition = ?
         GROUP BY choice
         """,
@@ -179,7 +179,7 @@ async def sum_choices_amounts(competition_id: str) -> List[ChoiceAmountSum]:
 async def update_competition_winners(competition_id: str, choices: str, winning_choice: int):
     await db.execute(
         """
-        UPDATE bookie.competitions
+        UPDATE bets4sats.competitions
         SET choices = ?, winning_choice = ?
         WHERE id = ?
         """,
@@ -188,7 +188,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
     if winning_choice < 0:
         await db.execute(
             """
-            UPDATE bookie.tickets
+            UPDATE bets4sats.tickets
             SET state = ?
             WHERE competition = ? AND state = ?
             """,
@@ -197,7 +197,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
     else:
         await db.execute(
             """
-            UPDATE bookie.tickets
+            UPDATE bets4sats.tickets
             SET state = ?
             WHERE competition = ? AND state = ? AND choice = ?
             """,
@@ -205,7 +205,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
         )
         await db.execute(
             """
-            UPDATE bookie.tickets
+            UPDATE bets4sats.tickets
             SET state = ?
             WHERE competition = ? AND state = ? AND choice != ?
             """,
@@ -214,7 +214,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
 
 
 async def get_competition(competition_id: str) -> Optional[Competition]:
-    row = await db.fetchone("SELECT * FROM bookie.competitions WHERE id = ?", (competition_id,))
+    row = await db.fetchone("SELECT * FROM bets4sats.competitions WHERE id = ?", (competition_id,))
     return Competition(**row) if row else None
 
 
@@ -224,14 +224,14 @@ async def get_competitions(wallet_ids: Union[str, List[str]]) -> List[Competitio
 
     q = ",".join(["?"] * len(wallet_ids))
     rows = await db.fetchall(
-        f"SELECT * FROM bookie.competitions WHERE wallet IN ({q})", (*wallet_ids,)
+        f"SELECT * FROM bets4sats.competitions WHERE wallet IN ({q})", (*wallet_ids,)
     )
 
     return [Competition(**row) for row in rows]
 
 
 async def delete_competition(competition_id: str) -> None:
-    await db.execute("DELETE FROM bookie.competitions WHERE id = ?", (competition_id,))
+    await db.execute("DELETE FROM bets4sats.competitions WHERE id = ?", (competition_id,))
 
 
 # COMPETITIONTICKETS
@@ -239,7 +239,7 @@ async def delete_competition(competition_id: str) -> None:
 
 async def get_wallet_competition_tickets(competition_id: str) -> List[Ticket]:
     rows = await db.fetchall(
-        "SELECT * FROM bookie.tickets WHERE competition = ?",
+        "SELECT * FROM bets4sats.tickets WHERE competition = ?",
         (competition_id,),
     )
     return [Ticket(**row) for row in rows]
@@ -248,14 +248,14 @@ async def get_state_competition_tickets(competition_id: str, states: List[str]) 
     assert len(states) > 0, "get_state_competition_tickets called with no states"
     query = " OR ".join(["state = ?" for _state in states])
     rows = await db.fetchall(
-        f"SELECT * FROM bookie.tickets WHERE competition = ? AND ({query})",
+        f"SELECT * FROM bets4sats.tickets WHERE competition = ? AND ({query})",
         (competition_id, *states),
     )
     return [Ticket(**row) for row in rows]
 
 async def is_competition_payment_complete(competition_id: str) -> List[Ticket]:
     row = await db.fetchone(
-        "SELECT id FROM bookie.tickets WHERE competition = ? AND state != ? AND state != ? AND state != ? AND state != ? AND state != ? LIMIT 1",
+        "SELECT id FROM bets4sats.tickets WHERE competition = ? AND state != ? AND state != ? AND state != ? AND state != ? AND state != ? LIMIT 1",
         (competition_id, "CANCELLED_PAID", "CANCELLED_PAYMENT_FAILED", "WON_PAID", "WON_PAYMENT_FAILED", "LOST"),
     )
     return not row
