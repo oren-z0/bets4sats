@@ -1,9 +1,9 @@
 {
     "repos": [
         {
-            "id": "competitions",
-            "organisation": "lnbits",
-            "repository": "competitions"
+            "id": "bets4sats",
+            "organisation": "oren-z0",
+            "repository": "bets4sats"
         }
     ]
 }
