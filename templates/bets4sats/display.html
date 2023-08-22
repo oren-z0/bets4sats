@@ -7,21 +7,20 @@
         <h3 class="q-my-none">{{ competition_name }}</h3>
         <br />
         <p class="q-my-none text-italic">
-          DISCLAIMER: This server does not use external sources to check the competition results.
-          It simply relies the server admin to enter the true results. This means that the
-          server admin and node operator could technically steal your prize. Use this app only if
-          you trust the server admin and node operator not to cheat.
-          <br />
-          On winning, the server admin will take 1% fee from the prize and will also deduct lightning
-          fees (usually 1% for normal payments or 2 sats for small payments).
-          Please make sure that you know how to contact the server admin in case the lightning
-          payment fails. 
+          DISCLAIMER: This server does not use external sources to check competition results.
+          It simply relies on the server admin to enter the winning party and trigger the payouts. 
+          Use this app only if you trust the server admin !
+            <br />
+          Note: The admin takes 1% fee from the winner and will additionally to the normal network
+          fees (usually 1% for normal payments or 2 sats for small payments.
         </p>
         <br />
         <h5 class="q-my-none" style="white-space: pre-wrap;">{{ competition_info }}</h5>
         <br />
         <div v-if="!isCompetitionOpen">
-          <h4 class="q-my-none">Competition is closed for new bets.</h4>
+          <h4 class="q-my-none">No more bets possible. 
+          <br/>
+          You will be notified right after this competition´s timeframe.</h4>
           <br/>
         </div>
         <q-form @submit="Invoice()" class="q-gutter-md">
@@ -93,7 +92,7 @@
           target="_blank"
           color="primary"
           type="a"
-          >Link to your ticket!</q-btn
+          >Link to your ticket! Please save this url.</q-btn
         >
         <br /><br />
         <p>You'll be redirected in a few moments...</p>
