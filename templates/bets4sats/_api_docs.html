@@ -7,32 +7,33 @@
   <q-card>
     <q-card-section>
       <h5 class="text-subtitle1 q-my-none">
-        Bets4Sats: Sell tickets for bets on competitions and pay rewards automatically
+        Bets4Sats lets you bid on a competition and pays out rewards to the winner/s.
       </h5>
       <p>
-        Bets4Sats allows you to manage bets between friends on competitions.
-        Each user chooses an option to bet on, fills a lightning-address to receive
-        the winning reward, and sends an amount of sats.
-        Bets4Sats comes with a shareable ticket scanner, which can be used to
-        quickly find a ticket (i.e. in case of a dispute).<br />
+        This extension allows you to manage bets between friends on your competitions.
+        Each user chooses an option to bet on as well as a lightning-address or a lnurlp 
+        (must be on another lnbits instance) to receive the price. When the admin of the 
+        competition sets the option that has won it will trigger those reward/s to be send.<br />
+        Bets4Sats comes with a shareable ticket scanner, that can be used to
+        look up tickets (i.e. in case of a question).<br />
+        <br />
         Competition States:<br />
-        - INITIAL: Winning choice was not selected yet by the manager.<br />
-        - COMPLETED_PAYING: Winning choice was selected by the manager or the manager
-        decided to cancel the competition - iterating over users to try to pay rewards
-        or refunds.<br />
-        - COMPLETED_PAID: Iterating over the users has completed.<br />
+        - INITIAL: No winning option selected yet<br />
+        - COMPLETED_PAYING: Winning choice was selected. If cancelled refunds will be paid out.<br />
+        - COMPLETED_PAID: All winners found.<br />
+        <br />
         Ticket States:<br />
-        - INITIAL: Winning choice was not selected yet.<br />
-        - LOST: Ticket choice has lost.<br />
-        - WON_UNPAID: Ticket choice has won, iteration over winning users has not reached
-        this user yet. <br />
-        - WON_PAYING: Ticket choice has won, trying to pay reward to user.<br />
-        - WON_PAYMENT_FAILED: Reward payment failed.<br />
-        - WON_PAID: Reward payment succeeded.<br />
+        - INITIAL: Winning option was not selected yet.<br />
+        - LOST: This Ticket has made a wrong bet.<br />
+        - WON_UNPAID: This ticket is from a winner! Searching more.. <br />
+        - WON_PAYING: This option has won, start paying out the price..<br />
+        - WON_PAYMENT_FAILED: Paymemt to winner failed.<br />
+        - WON_PAID: Payment to winner successful.<br />
         - CANCELLED_UNPAID, CANCELLED_PAYING, CANCELLED_PAYMENT_FAILED, CANCELLED_PAID: Same
         as WON_UNPAID, WON_PAYING, WON_PAYMENT_FAILED, WON_PAID, but in case the competition
         was cancelled and the user deserves to get a refund instead of a reward.<br />
         <small>
+          <br />
           Created by
           <a class="text-secondary" href="https://github.com/oren-z0">Oren-Z0</a>
           - Forked from the
