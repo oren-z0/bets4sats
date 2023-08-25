@@ -54,7 +54,7 @@
                   type="a"
                   :href="props.row.displayUrl"
                   target="_blank"
-                ></q-btn>
+                ><q-tooltip>Sharable Page</q-tooltip></q-btn>
                 <q-btn
                   unelevated
                   dense
@@ -64,7 +64,7 @@
                   type="a"
                   :href="'/bets4sats/register/' + props.row.id + '/' + props.row.register_id"
                   target="_blank"
-                ></q-btn>
+                ><q-tooltip>Scan/Find Tickets</q-tooltip></q-btn>
               </q-td>
               <q-td v-for="col in props.cols" :key="col.name" :props="props">
                 {{ col.value }}
@@ -77,7 +77,7 @@
                   @click="updateformDialog(props.row.id)"
                   icon="edit"
                   color="light-blue"
-                ></q-btn>
+                ><q-tooltip>Edit and Choose Winners</q-tooltip></q-btn>
               </q-td>
               <q-td auto-width>
                 <q-btn
@@ -87,7 +87,7 @@
                   @click="deleteCompetition(props.row.id)"
                   icon="cancel"
                   color="pink"
-                ></q-btn>
+                ><q-tooltip>Delete Competition</q-tooltip></q-btn>
               </q-td>
             </q-tr>
           </template>
