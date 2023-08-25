@@ -186,7 +186,7 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
         except Exception as error:
             logger.warning(f"Failed to get lnurlp parameters {error}")
             raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN, detail="Bad lightning address or lnurl-pay"
+                status_code=HTTPStatus.FORBIDDEN, detail="Bad lightning address, lnurl-pay or wallet-id"
             )            
     ticket_id = shortuuid.random()
     payment_request = None

@@ -6,8 +6,8 @@ import json
 import re
 
 from lnbits import lnurl, bolt11
-from lnbits.core.services import fee_reserve, pay_invoice
-from lnbits.core.crud import get_payments
+from lnbits.core.services import fee_reserve, pay_invoice, create_invoice
+from lnbits.core.crud import get_payments, get_wallet
 from lnbits.core.models import PaymentFilters
 from lnbits.db import Filters, Filter
 from starlette.exceptions import HTTPException
@@ -18,7 +18,7 @@ from .crud import create_ticket, get_competition, get_ticket
 from .models import LnurlpParameters
 
 # Similar to /api/v1/lnurlscan/{code}
-async def get_lnurlp_parameters(code: str) -> LnurlpParameters:
+async def get_lnurlp_parameters(code: str) -> LnurlpParameters | str:
     try:
         url = lnurl.decode(code)
     except:
@@ -32,7 +32,10 @@ async def get_lnurlp_parameters(code: str) -> LnurlpParameters:
                 + name
             )
         else:
-            raise Exception("Malformed lnurl-pay or lightning-address")
+            reward_wallet = await get_wallet(code)
+            if reward_wallet is not None:
+                return code
+            raise Exception("Malformed lnurl-pay, lightning-address or wallet-id")
     try:
         parsed_url = urlparse(url)
     except:
@@ -80,29 +83,44 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
     if final_amount_msat <= 0:
         raise Exception("Payment is negative or zero after deducting lightning fees")
     params = await get_lnurlp_parameters(code)
-    if final_amount_msat < params.minSendable:
-        raise Exception("Payment is too small for receiver")
-    if final_amount_msat > params.maxSendable:
-        raise Exception("Payment is too high for receiver")
-    try:
-        parsed_callback = urlparse(params.callback)
-    except:
-        raise Exception("Unparsable lnurl-pay callback")
-    comment = description if len(description) <= params.commentAllowed else ""
-    full_callback_url = params.callback + ("&" if parsed_callback.query else "?") + f"amount={final_amount_msat}" + (
-        f"&comment={quote(comment)}" if comment else ""
-    )
-    async with httpx.AsyncClient() as client:
-        r = await client.get(full_callback_url, timeout=5)
-        if r.is_error:
-            raise Exception("Failed to call callback url")
-    try:
-        data = json.loads(r.text)
-    except json.decoder.JSONDecodeError:
-        raise Exception("Failed to decode callback response json")
-    if not isinstance(data, dict):
-        raise Exception("Failed to decode callback response object")
-    pr = data.get("pr")
+    if isinstance(params, LnurlpParameters):
+        if final_amount_msat < params.minSendable:
+            raise Exception("Payment is too small for receiver")
+        if final_amount_msat > params.maxSendable:
+            raise Exception("Payment is too high for receiver")
+        try:
+            parsed_callback = urlparse(params.callback)
+        except:
+            raise Exception("Unparsable lnurl-pay callback")
+        comment = description if len(description) <= params.commentAllowed else ""
+        full_callback_url = params.callback + ("&" if parsed_callback.query else "?") + f"amount={final_amount_msat}" + (
+            f"&comment={quote(comment)}" if comment else ""
+        )
+        async with httpx.AsyncClient() as client:
+            r = await client.get(full_callback_url, timeout=5)
+            if r.is_error:
+                raise Exception("Failed to call callback url")
+        try:
+            data = json.loads(r.text)
+        except json.decoder.JSONDecodeError:
+            raise Exception("Failed to decode callback response json")
+        if not isinstance(data, dict):
+            raise Exception("Failed to decode callback response object")
+        pr = data.get("pr")
+    else:
+        final_amount_sat = final_amount_msat // 1000
+        if final_amount_sat <= 0:
+            raise Exception("Prize less than 1 sat cannot be paid to LNbits wallets")
+        try:
+            _payment_hash, pr = await create_invoice(
+                wallet_id=params,
+                amount=final_amount_sat,
+                memo=description,
+                internal=True
+            )
+        except Exception as e:
+            logger.warning("Failed to pay to wallet {params}: {e}")
+            raise Exception("Failed to pay to local LNbits wallet")
     if not isinstance(pr, str):
         raise Exception("Unexpected callback response parameters types")
     logger.info(f"pay_lnurlp: decoding pr {pr}")
