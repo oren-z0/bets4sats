@@ -185,7 +185,7 @@
               dense
               v-model.trim="formDialog.data.name"
               type="text"
-              label="Title of competition "
+              label="Title of competition *"
               :disable="formDialog.data.id != null"
             ></q-input>
           </div>
@@ -208,7 +208,7 @@
           dense
           v-model.trim="formDialog.data.info"
           type="textarea"
-          label="Info about the competition "
+          label="Info about the competition (optional) "
           :disable="formDialog.data.id != null"
         ></q-input>
 
@@ -273,7 +273,7 @@
               dense
               v-model.number="formDialog.data.min_bet"
               type="number"
-              label="Min bet in sats (at least 10) "
+              label="Min bet in sats (at least 10) *"
               :disable="formDialog.data.id != null"
             ></q-input>
           </div>
@@ -283,7 +283,7 @@
               dense
               v-model.number="formDialog.data.max_bet"
               type="number"
-              label="Max bet in sats "
+              label="Max bet in sats *"
               :disable="formDialog.data.id != null"
             ></q-input>
           </div>
@@ -318,7 +318,7 @@
               dense
               v-model.number="formDialog.data.amount_tickets"
               type="number"
-              label="Amount of tickets "
+              label="Amount of tickets *"
               :disable="formDialog.data.id && (formDialog.data.state != 'INITIAL')"
             ></q-input>
           </div>
@@ -336,7 +336,7 @@
             v-if="!formDialog.data.id"
             unelevated
             color="primary"
-            :disable="!formDialog.data.wallet || !formDialog.data.name || !formDialog.data.info || !formDialog.data.closing_date || !formDialog.data.closing_time || !Number.isSafeInteger(formDialog.data.amount_tickets) || formDialog.data.amount_tickets < 0 || !Number.isSafeInteger(formDialog.data.min_bet) || !Number.isSafeInteger(formDialog.data.max_bet) || formDialog.data.min_bet < 10 || formDialog.data.max_bet < formDialog.data.min_bet || 21_000_000_00_000_000 <= formDialog.data.max_bet"
+            :disable="!formDialog.data.wallet || !formDialog.data.name || !formDialog.data.closing_date || !formDialog.data.closing_time || !Number.isSafeInteger(formDialog.data.amount_tickets) || formDialog.data.amount_tickets < 0 || !Number.isSafeInteger(formDialog.data.min_bet) || !Number.isSafeInteger(formDialog.data.max_bet) || formDialog.data.min_bet < 10 || formDialog.data.max_bet < formDialog.data.min_bet || 21_000_000_00_000_000 <= formDialog.data.max_bet"
             type="submit"
             >Create Competition</q-btn
           >
@@ -397,6 +397,7 @@
       info: "",
       choices: [{ title: "Team A" }, { title: "Team B" }],
       min_bet: 10,
+      max_bet: 100_000_000,
     }
   }
 
