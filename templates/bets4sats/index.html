@@ -318,7 +318,7 @@
               dense
               v-model.number="formDialog.data.amount_tickets"
               type="number"
-              label="Amount of tickets *"
+              :label="formDialog.data.id ? 'Amount of tickets left *' : 'Amount of tickets *'"
               :disable="formDialog.data.id && (formDialog.data.state != 'INITIAL')"
             ></q-input>
           </div>
@@ -398,6 +398,7 @@
       choices: [{ title: "Team A" }, { title: "Team B" }],
       min_bet: 10,
       max_bet: 100_000_000,
+      amount_tickets: 100,
     }
   }
 
