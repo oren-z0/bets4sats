@@ -32,27 +32,27 @@ async def get_lnurlp_parameters(code: str) -> LnurlpParameters:
                 + name
             )
         else:
-            raise Exception("Malformed lnurlp or lightning-address")
+            raise Exception("Malformed lnurl-pay or lightning-address")
     try:
         parsed_url = urlparse(url)
     except:
-        raise Exception("Unparsable lnurlp or lightning-address")
+        raise Exception("Unparsable lnurl-pay or lightning-address")
     if "tag=login" in parsed_url.query.split("&"):
-        raise Exception("Invalid lnurlp - this is a login lnurl")
+        raise Exception("Invalid lnurl-pay - this is an lnurl-auth")
     async with httpx.AsyncClient() as client:
         r = await client.get(url, timeout=5)
         if r.is_error:
-            raise Exception("Failed to get lnurlp parameters")
+            raise Exception("Failed to get lnurl-pay parameters")
     try:
         data = json.loads(r.text)
     except json.decoder.JSONDecodeError:
-        raise Exception("Failed to decode lnurlp parameters json")
+        raise Exception("Failed to decode lnurl-pay parameters json")
     
     if not isinstance(data, dict):
-        raise Exception("Failed to decode lnurlp parameters object")
+        raise Exception("Failed to decode lnurl-pay parameters object")
 
     if data.get("tag") != "payRequest":
-        raise Exception("Unexpected lnurlp tag: should be payRequest")
+        raise Exception("Unexpected lnurl-pay tag: should be payRequest")
     
     minSendable = data.get("minSendable")
     maxSendable = data.get("maxSendable")
@@ -60,7 +60,7 @@ async def get_lnurlp_parameters(code: str) -> LnurlpParameters:
     commentAllowed = data.get("commentAllowed")
 
     if not isinstance(minSendable, int) or not isinstance(maxSendable, int) or not isinstance(callback, str):
-        raise Exception("Unexpected lnurlp parameters types")
+        raise Exception("Unexpected parameters types")
     
     return LnurlpParameters(
         minSendable=minSendable,
@@ -87,7 +87,7 @@ async def pay_lnurlp(wallet_id: str, code: str, amount_msat: int, description: s
     try:
         parsed_callback = urlparse(params.callback)
     except:
-        raise Exception("Unparsable lnurlp callback")
+        raise Exception("Unparsable lnurl-pay callback")
     comment = description if len(description) <= params.commentAllowed else ""
     full_callback_url = params.callback + ("&" if parsed_callback.query else "?") + f"amount={final_amount_msat}" + (
         f"&comment={quote(comment)}" if comment else ""
