@@ -27,10 +27,10 @@ in case of disputes.
    - choices
    - minimum bet and maximum bet for each ticket
    - ticket selling closing date (universal time clock)
-   - amount of tickets to sell
+   - number of tickets to sell
 
    Once the competition has been created, you can only modify the ticket closing date
-   and the amount of tickets. The other competition details cannot be modified!
+   and the number of tickets. The other competition details cannot be modified!
 
    ![competition info](https://i.imgur.com/F9N7woa.png)
 

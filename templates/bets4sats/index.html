@@ -318,7 +318,7 @@
               dense
               v-model.number="formDialog.data.amount_tickets"
               type="number"
-              :label="formDialog.data.id ? 'Amount of tickets left *' : 'Amount of tickets *'"
+              :label="formDialog.data.id ? 'Number of tickets left *' : 'Number of tickets *'"
               :disable="formDialog.data.id && (formDialog.data.state != 'INITIAL')"
             ></q-input>
           </div>
@@ -435,7 +435,7 @@
             {
               name: 'amount_tickets',
               align: 'left',
-              label: 'No tickets',
+              label: 'No. tickets left',
               field: 'amount_tickets'
             },
             {
