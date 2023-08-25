@@ -4,6 +4,7 @@ import json
 import hmac
 
 from fastapi import Depends, Query
+from loguru import logger
 import shortuuid
 from starlette.exceptions import HTTPException
 
@@ -182,7 +183,8 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
     if data.reward_target:
         try:
             await get_lnurlp_parameters(data.reward_target)
-        except:
+        except Exception as error:
+            logger.warning(f"Failed to get lnurlp parameters {error}")
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="Bad lightning address or lnurl-pay"
             )            
