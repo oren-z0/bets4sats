@@ -165,14 +165,17 @@
     },
 
     mounted: function () {
-      const timeToClose = new Date('{{ competition_closing_datetime }}').getTime() - Date.now()
-      console.info('timeToClose', timeToClose)
-      if (timeToClose > 0) {
-        setTimeout(() => {
-          console.info('closing due to timeout')
-          this.isCompetitionOpen = false
-        }, timeToClose)
+      const self = this
+      const autoClose = () => {
+        const timeToClose = new Date('{{ competition_closing_datetime }}').getTime() - Date.now()
+        console.info('timeToClose', timeToClose)
+        if (timeToClose <= 0) {
+          self.isCompetitionOpen = false
+          return
+        }
+        setTimeout(autoClose, Math.min(timeToClose, 2**31 - 1))
       }
+      autoClose()
     },
 
     methods: {
