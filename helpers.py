@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import urlparse, quote
@@ -18,7 +18,7 @@ from .crud import create_ticket, get_competition, get_ticket
 from .models import LnurlpParameters
 
 # Similar to /api/v1/lnurlscan/{code}
-async def get_lnurlp_parameters(code: str) -> LnurlpParameters | str:
+async def get_lnurlp_parameters(code: str) -> Union[LnurlpParameters, str]:
     try:
         url = lnurl.decode(code)
     except:
