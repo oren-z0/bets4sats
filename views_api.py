@@ -8,7 +8,7 @@ from loguru import logger
 import shortuuid
 from starlette.exceptions import HTTPException
 
-from lnbits.core.crud import get_user, create_ticket
+from lnbits.core.crud import get_user, create_ticket, INVOICE_EXPIRY
 from lnbits.core.services import create_invoice
 from lnbits.decorators import WalletTypeInfo, get_key_type
 
@@ -192,6 +192,7 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
     payment_request = None
     try:
         _payment_hash, payment_request = await create_invoice(
+            expiry=INVOICE_EXPIRY,
             wallet_id=competition.wallet,
             amount=data.amount,
             memo=f"Bets4SatsTicketId:{competition_id}.{ticket_id}",
