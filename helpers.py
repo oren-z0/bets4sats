@@ -14,7 +14,7 @@ from starlette.exceptions import HTTPException
 import httpx
 from loguru import logger
 
-from .crud import create_ticket, get_competition, get_ticket
+from .crud import get_competition, get_ticket, set_ticket_funded
 from .models import LnurlpParameters
 
 # Similar to /api/v1/lnurlscan/{code}
@@ -159,7 +159,7 @@ async def send_ticket(competition_id, ticket_id):
     if not ticket or ticket.competition_id != competition_id:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="Ticket could not be fetched.",
+            detail="Ticket could not be fetched, or invoice has expired.",
         )
     # TODO: Save payment-hash on ticket, so we could use get_standalone_payment()
     # instead of get_payments()
@@ -179,9 +179,12 @@ async def send_ticket(competition_id, ticket_id):
     if not all_payments:
         raise HTTPException(
               status_code=HTTPStatus.NOT_FOUND,
-              detail="Payment of given ticket-id could not be fetched.",
+              detail="Ticket payment could not be fetched, or invoice has expired.",
           )
     payment, = all_payments
     if payment.pending:
         await payment.check_status()
-    return {"paid": not payment.pending}
+    paid = not payment.pending
+    if paid:
+        await set_ticket_funded(ticket_id)
+    return {"paid": paid}

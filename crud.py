@@ -1,5 +1,6 @@
 from typing import List, Optional, Union
 import json
+import datetime
 
 import shortuuid
 from lnbits.helpers import urlsafe_short_hash
@@ -9,6 +10,8 @@ from .models import ChoiceAmountSum, CreateCompetition, Competition, Ticket, Upd
 
 # TICKETS
 
+INVOICE_EXPIRY = 15 * 60 # 15 minutes
+TICKET_PURGE_TIME = INVOICE_EXPIRY + 10 # safety 10 seconds more than ticket expiry
 
 async def create_ticket(
     ticket_id: str, wallet: str, competition: str, amount: int, reward_target: str,
@@ -22,23 +25,20 @@ async def create_ticket(
         (ticket_id, wallet, competition, amount, reward_target, choice, "INITIAL", 0, "", ""),
     )
 
-    # UPDATE COMPETITION DATA ON SOLD TICKET
+    # UPDATE COMPETITION DATA ON NEW TICKET
     while True:
       competitiondata = await get_competition(competition)
-      assert competitiondata, "Couldn't get competition from ticket being paid"
+      assert competitiondata, "Couldn't get competition from ticket being created"
       if competitiondata.state != "INITIAL":
           break
-      sold = competitiondata.sold + 1
       amount_tickets = competitiondata.amount_tickets - 1
-      choices = json.loads(competitiondata.choices)
-      choices[choice]["total"] += amount
       update_result = await db.execute(
           """
           UPDATE bets4sats.competitions
-          SET sold = ?, amount_tickets = ?, choices = ?
+          SET amount_tickets = ?
           WHERE id = ? AND amount_tickets = ? AND state = ?
           """,
-          (sold, amount_tickets, json.dumps(choices), competition, competitiondata.amount_tickets, "INITIAL"),
+          (amount_tickets, competition, competitiondata.amount_tickets, "INITIAL"),
       )
       if update_result.rowcount > 0:
           break
@@ -46,6 +46,57 @@ async def create_ticket(
     ticket = await get_ticket(ticket_id)
     assert ticket, "Newly created ticket couldn't be retrieved"
     return ticket
+
+async def purge_expired_tickets(competition_id: str) -> None:
+    purge_time = datetime.datetime.now() - datetime.timedelta(seconds=TICKET_PURGE_TIME)
+    delete_result = await db.execute(
+        """
+        DELETE FROM bets4sats.tickets
+        WHERE competition = ? AND state = ? AND time < """ + db.timestamp_placeholder,
+        (competition_id, "INITIAL", db.datetime_to_timestamp(purge_time))
+    )
+    if delete_result.rowcount <= 0:
+        return
+    while True:
+      competitiondata = await get_competition(competition_id)
+      assert competitiondata, "Couldn't get competition data for tickets being purged"
+      amount_tickets = competitiondata.amount_tickets + delete_result.rowcount
+      update_result = await db.execute(
+          """
+          UPDATE bets4sats.competitions
+          SET amount_tickets = ?
+          WHERE id = ? AND amount_tickets = ?
+          """,
+          (amount_tickets, competition_id, competitiondata.amount_tickets),
+      )
+      if update_result.rowcount > 0:
+          break
+
+async def set_ticket_funded(ticket_id: str) -> None:
+    cas_success = await cas_ticket_state(ticket_id, "INITIAL", "FUNDED")
+    if not cas_success:
+        return
+    ticket = await get_ticket(ticket_id)
+
+    # UPDATE COMPETITION DATA ON SOLD TICKET
+    while True:
+      competitiondata = await get_competition(ticket.competition)
+      assert competitiondata, "Couldn't get competition from ticket being paid"
+      if competitiondata.state != "INITIAL":
+          break
+      sold = competitiondata.sold + 1
+      choices = json.loads(competitiondata.choices)
+      choices[choice]["total"] += ticket.amount
+      update_result = await db.execute(
+          """
+          UPDATE bets4sats.competitions
+          SET sold = ?, choices = ?
+          WHERE id = ? AND sold = ? AND state = ?
+          """,
+          (sold, json.dumps(choices), ticket.competition, competitiondata.sold, "INITIAL"),
+      )
+      if update_result.rowcount > 0:
+          break
 
 async def cas_ticket_state(ticket_id: str, old_state: str, new_state: str) -> bool:
     update_result = await db.execute(
@@ -192,7 +243,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
             SET state = ?
             WHERE competition = ? AND state = ?
             """,
-            ("CANCELLED_UNPAID", competition_id, "INITIAL")
+            ("CANCELLED_UNPAID", competition_id, "FUNDED")
         )
     else:
         await db.execute(
@@ -201,7 +252,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
             SET state = ?
             WHERE competition = ? AND state = ? AND choice = ?
             """,
-            ("WON_UNPAID", competition_id, "INITIAL", winning_choice)
+            ("WON_UNPAID", competition_id, "FUNDED", winning_choice)
         )
         await db.execute(
             """
@@ -209,7 +260,7 @@ async def update_competition_winners(competition_id: str, choices: str, winning_
             SET state = ?
             WHERE competition = ? AND state = ? AND choice != ?
             """,
-            ("LOST", competition_id, "INITIAL", winning_choice)
+            ("LOST", competition_id, "FUNDED", winning_choice)
         )
 
 
@@ -229,6 +280,12 @@ async def get_competitions(wallet_ids: Union[str, List[str]]) -> List[Competitio
 
     return [Competition(**row) for row in rows]
 
+
+async def get_all_competitions() -> List[Competition]:
+    rows = await db.fetchall(
+        f"SELECT * FROM bets4sats.competitions",
+    )
+    return [Competition(**row) for row in rows]
 
 async def delete_competition(competition_id: str) -> None:
     await db.execute("DELETE FROM bets4sats.competitions WHERE id = ?", (competition_id,))

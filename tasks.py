@@ -1,15 +1,23 @@
 import asyncio
 import json
+from time import sleep
 
 from lnbits.core.models import Payment
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 from loguru import logger
 
-from .crud import cas_competition_state, get_ticket, cas_ticket_state, get_competition, update_ticket, is_competition_payment_complete
+from .crud import cas_competition_state, get_ticket, cas_ticket_state, get_competition, update_ticket, is_competition_payment_complete, get_all_competitions, TICKET_PURGE_TIME
 from .helpers import pay_lnurlp, send_ticket
 
 PRIZE_FEE_PERCENT = 1
+
+async def purge_tickets_loop():
+    while True:
+        sleep(TICKET_PURGE_TIME // 2)
+        await competitions = await get_all_competitions()
+        for competition in competitions:
+            await purge_expired_tickets(competition.id)
 
 reward_ticket_ids_queue = asyncio.Queue()
 

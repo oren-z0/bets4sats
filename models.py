@@ -53,7 +53,7 @@ class Ticket(BaseModel):
     amount: int
     reward_target: str
     choice: int
-    # states: INITIAL, LOST, WON_UNPAID, WON_PAYING, WON_PAYMENT_FAILED, WON_PAID,
+    # states: INITIAL, FUNDED, LOST, WON_UNPAID, WON_PAYING, WON_PAYMENT_FAILED, WON_PAID,
     # CANCELLED_UNPAID, CANCELLED_PAYING, CANCELLED_PAYMENT_FAILED, CANCELLED_PAID
     state: str
     reward_msat: int

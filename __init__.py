@@ -25,7 +25,7 @@ def bets4sats_renderer():
     return template_renderer(["lnbits/extensions/bets4sats/templates"])
 
 
-from .tasks import wait_for_paid_invoices, wait_for_reward_ticket_ids
+from .tasks import wait_for_paid_invoices, wait_for_reward_ticket_ids, purge_tickets_loop
 from .views import *  # noqa: F401,F403
 from .views_api import *  # noqa: F401,F403
 
@@ -34,3 +34,4 @@ def bets4sats_start():
     loop = asyncio.get_event_loop()
     loop.create_task(catch_everything_and_restart(wait_for_paid_invoices))
     loop.create_task(catch_everything_and_restart(wait_for_reward_ticket_ids))
+    loop.create_task(catch_everything_and_restart(purge_tickets_loop))
