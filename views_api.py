@@ -206,7 +206,6 @@ async def api_ticket_make_ticket(competition_id, data: CreateInvoiceForTicket):
             reward_target=str(data.reward_target),
             choice=int(data.choice)
         )
-        # TODO: Delete ticket if invoice expires.
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
     return {"ticket_id": ticket_id, "payment_request": payment_request}
